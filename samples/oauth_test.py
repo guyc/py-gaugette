@@ -1,9 +1,9 @@
 import gaugette.oauth
 import datetime
 
-CLIENT_ID       = '911969952744.apps.googleusercontent.com'
-CLIENT_SECRET   = 'fj7nrIP3AeYDFQDbewnWrmfM'
-SPREADSHEET_KEY = '0Av8piskZzvGEdE0xZWt5LUhWZWFHajZRYV9WZWR6Qnc'
+CLIENT_ID       = 'your client_id here'
+CLIENT_SECRET   = 'your client secret here'
+SPREADSHEET_KEY = 'your spreadsheet key here'
 
 oauth = gaugette.oauth.OAuth(CLIENT_ID, CLIENT_SECRET)
 if not oauth.has_token():
