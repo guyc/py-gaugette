@@ -22,6 +22,7 @@ class OAuth:
             'https://docs.google.com/feeds',         # if an application needs to create spreadsheets, or otherwise manipulate their metadata,
         ]
         self.host = 'accounts.google.com'
+        # httplib.HTTPConnection.debuglevel = 1
         self.conn = httplib.HTTPSConnection(self.host)
         self.load_token()
 
@@ -92,17 +93,18 @@ class OAuth:
                 else:
                     time.sleep(self.retry_interval + 2)
 
-    def refresh_token():
+    def refresh_token(self):
+        refresh_token = self.token['refresh_token']
         self.conn.request(
-            "POST"
-            "/o/auth2/token",
+            "POST",
+            "/o/oauth2/token",
             urllib.urlencode({
                 'client_id'     : self.client_id,
                 'client_secret' : self.client_secret,
-                'refresh_token' : self.token['refresh_token'],
+                'refresh_token' : refresh_token,
                 'grant_type'    : 'refresh_token'
                 }),
-                {"Content-type": "application/x-www-form-urlencoded"}            
+            {"Content-type": "application/x-www-form-urlencoded"}            
             )
 
         response = self.conn.getresponse()
@@ -110,11 +112,14 @@ class OAuth:
             data = json.loads(response.read())
             if 'access_token' in data:
                 self.token = data
-                # appears we do not get a NEW refresh token at this point
-                if not 'refresh_token' in token:
+                # in fact we NEVER get a new refresh token at this point
+                if not 'refresh_token' in self.token:
                     self.token['refresh_token'] = refresh_token
                     self.save_token()
                 return True
+        else:
+            print("Unexpected response %d to renewal request" % response.status)
+            print(response.read())
         return False
               
     def spreadsheet_service(self):

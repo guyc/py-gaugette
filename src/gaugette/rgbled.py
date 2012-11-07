@@ -23,8 +23,8 @@ class RgbLed:
         wiringpi.softPwmWrite(self.b_pin, blue)
         print [red,green,blue]
 
-    def fade(self, red, green, blue, delay=100, interval=5):
-        for i in range(0, delay, interval):
+    def fade(self, red, green, blue, delay=500, step=5):
+        for i in range(0, delay, step):
             f = (0.0+i)/delay
             r = self.red   + (red  -self.red)   * f
             wiringpi.softPwmWrite(self.r_pin, int(r))
@@ -32,7 +32,7 @@ class RgbLed:
             wiringpi.softPwmWrite(self.g_pin, int(g))
             b = self.blue  + (blue -self.blue)  * f
             wiringpi.softPwmWrite(self.b_pin, int(b))
-            wiringpi.delay(interval)
+            wiringpi.delay(step)
         self.red = red
         self.blue = blue
         self.green = green
