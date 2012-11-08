@@ -114,7 +114,6 @@ class SSD1306:
         self.gpio.pinMode(self.dc_pin, self.gpio.OUTPUT)
         self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW)
         self.font = font5x8.Font5x8
-        #self.font = font10x16.Font10x16
         self.buffer = [0] * (self.buffer_cols * self.buffer_rows / 8)
 
     def reset(self):
@@ -123,7 +122,8 @@ class SSD1306:
         self.gpio.digitalWrite(self.reset_pin, self.gpio.HIGH)
 
     def command(self, *bytes):
-        #self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW)
+        # already low
+        # self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW) 
         self.spi.writebytes(list(bytes))
 
     def data(self, bytes):
@@ -202,7 +202,7 @@ class SSD1306:
                     mask >>= 1
                 x += 1
 
-    def draw_text2(self, x, y, string, size):
+    def draw_text2(self, x, y, string, size=2, space=1):
         font_bytes = self.font.bytes
         font_rows = self.font.rows
         font_cols = self.font.cols
@@ -221,4 +221,4 @@ class SSD1306:
                         py += 1
                     mask >>= 1
                 x += size
-    
+            x += space
