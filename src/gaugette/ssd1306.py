@@ -170,7 +170,6 @@ class SSD1306:
     def display(self):
         self.command(self.SETLOWCOLUMN | 0x0)
         self.command(self.SETHIGHCOLUMN | 0x0)
-        self.command(self.SETSTARTLINE | 0x0)
         self.data(self.buffer)
 
     def start_scroll_right(self, start, stop):
@@ -183,7 +182,7 @@ class SSD1306:
         mem_row = y / 8
         bit_mask = 1 << (y % 8)
         offset = mem_row * self.buffer_cols + mem_col
-        #print [x,y,mem_row, mem_col, offset]
+
         if on:
             self.buffer[offset] |= bit_mask
         else:
