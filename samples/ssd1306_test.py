@@ -29,7 +29,7 @@ while True:
         text = time.strftime("%e %b %Y")
         led.draw_text2(0,16,text,2)
         text = time.strftime("%X")
-        led.draw_text2(8,32+4,text,3)
+        led.draw_text2(0,32+4,text,3)
         led.display()
         time.sleep(0.2)
     else:
