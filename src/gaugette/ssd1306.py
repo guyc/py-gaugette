@@ -80,10 +80,17 @@ class SSD1306:
     SETHIGHCOLUMN = 0x10
     SETSTARTLINE = 0x40
     MEMORYMODE = 0x20
+    SET_COL_ADDRESS  = 0x21
+    SET_PAGE_ADDRESS = 0x22
+
     COMSCANINC = 0xC0
     COMSCANDEC = 0xC8
     SEGREMAP = 0xA0
     CHARGEPUMP = 0x8D
+
+    MEMORY_MODE_HORIZ = 0x00
+    MEMORY_MODE_VERT  = 0x01
+    MEMORY_MODE_PAGE  = 0x02
     
     ACTIVATE_SCROLL = 0x2F
     DEACTIVATE_SCROLL = 0x2E
@@ -222,3 +229,44 @@ class SSD1306:
                     mask >>= 1
                 x += size
             x += space
+
+
+    def clear_block(self, x0,y0,dx,dy):
+        for x in range(x0,x0+dx):
+            for y in range(y0,y0+dy):
+                self.draw_pixel(x,y,0)
+        
+    def draw_text3(self, x, y, string, font):
+        height = font.char_height
+        prev_char = None
+
+        for c in string:
+            if (c<font.start_char or c>font.end_char):
+                if prev_char != None:
+                    x += font.space_width + prev_width + font.gap_width
+                prev_char = None
+            else:
+                pos = ord(c) - ord(font.start_char)
+                (width,offset) = font.descriptors[pos]
+
+                if prev_char != None:
+                    x += font.kerning[prev_char][pos] + font.gap_width
+                    
+                prev_char = pos
+                prev_width = width
+                
+                bytes_per_row = (width + 7) / 8
+                for row in range(0,height):
+                    py = y + row
+                    mask = 0x80
+                    p = offset
+                    for col in range(0,width):
+                        px = x + col
+                        if (font.bitmaps[p] & mask):
+                            self.draw_pixel(px,py,1)  # for kerning, never draw black
+                        mask >>= 1
+                        if mask == 0:
+                            mask = 0x80
+                            p+=1
+                    offset += bytes_per_row
+          
