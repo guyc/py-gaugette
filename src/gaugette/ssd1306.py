@@ -60,56 +60,52 @@ class SSD1306:
 
     # TODO - insert underscores to rationalize constant names
 
-    EXTERNALVCC = 0x1
-    SWITCHCAPVCC = 0x2
+    EXTERNAL_VCC   = 0x1
+    SWITCH_CAP_VCC = 0x2
         
-    SETCONTRAST = 0x81
-    DISPLAYALLON_RESUME = 0xA4
-    DISPLAYALLON = 0xA5
-    NORMALDISPLAY = 0xA6
-    INVERTDISPLAY = 0xA7
-    DISPLAYOFF = 0xAE
-    DISPLAYON = 0xAF
-    SETDISPLAYOFFSET = 0xD3
-    SETCOMPINS = 0xDA
-    SETVCOMDETECT = 0xDB
-    SETDISPLAYCLOCKDIV = 0xD5
-    SETPRECHARGE = 0xD9
-    SETMULTIPLEX = 0xA8
-    SETLOWCOLUMN = 0x00
-    SETHIGHCOLUMN = 0x10
-    SETSTARTLINE = 0x40
-    MEMORYMODE = 0x20
-    SET_COL_ADDRESS  = 0x21
-    SET_PAGE_ADDRESS = 0x22
-
-    COMSCANINC = 0xC0
-    COMSCANDEC = 0xC8
-    SEGREMAP = 0xA0
-    CHARGEPUMP = 0x8D
+    SET_LOW_COLUMN        = 0x00
+    SET_HIGH_COLUMN       = 0x10
+    SET_MEMORY_MODE       = 0x20
+    SET_COL_ADDRESS       = 0x21
+    SET_PAGE_ADDRESS      = 0x22
+    RIGHT_HORIZ_SCROLL    = 0x26
+    LEFT_HORIZ_SCROLL     = 0x27
+    VERT_AND_RIGHT_HORIZ_SCROLL = 0x29
+    VERT_AND_LEFT_HORIZ_SCROLL = 0x2A
+    DEACTIVATE_SCROLL     = 0x2E
+    ACTIVATE_SCROLL       = 0x2F
+    SET_START_LINE        = 0x40
+    SET_CONTRAST          = 0x81
+    CHARGE_PUMP           = 0x8D
+    SEG_REMAP             = 0xA0
+    SET_VERT_SCROLL_AREA  = 0xA3
+    DISPLAY_ALL_ON_RESUME = 0xA4
+    DISPLAY_ALL_ON        = 0xA5
+    NORMAL_DISPLAY        = 0xA6
+    INVERT_DISPLAY        = 0xA7
+    DISPLAY_OFF           = 0xAE
+    DISPLAY_ON            = 0xAF
+    COM_SCAN_INC          = 0xC0
+    COM_SCAN_DEC          = 0xC8
+    SET_DISPLAY_OFFSET    = 0xD3
+    SET_COM_PINS          = 0xDA
+    SET_VCOM_DETECT       = 0xDB
+    SET_DISPLAY_CLOCK_DIV = 0xD5
+    SET_PRECHARGE         = 0xD9
+    SET_MULTIPLEX         = 0xA8
 
     MEMORY_MODE_HORIZ = 0x00
     MEMORY_MODE_VERT  = 0x01
     MEMORY_MODE_PAGE  = 0x02
-    
-    ACTIVATE_SCROLL = 0x2F
-    DEACTIVATE_SCROLL = 0x2E
-    SET_VERTICAL_SCROLL_AREA = 0xA3
-    RIGHT_HORIZONTAL_SCROLL = 0x26
-    LEFT_HORIZONTAL_SCROLL = 0x27
-    VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL = 0x29
-    VERTICAL_AND_LEFT_HORIZONTAL_SCROLL = 0x2A
 
     # Device name will be /dev/spidev-{bus}.{device}
     # dc_pin is the data/commmand pin.  This line is HIGH for data, LOW for command.
     # We will keep d/c low and bump it high only for commands with data
     # reset is normally HIGH, and pulled LOW to reset the display
 
-    def __init__(self, bus=0, device=0, dc_pin=1, reset_pin=2):
+    def __init__(self, bus=0, device=0, dc_pin=1, reset_pin=2, buffer_rows=64, buffer_cols=128):
         self.cols = 128
         self.rows = 32
-        self.buffer_cols = 128
-        self.buffer_rows = 64
         self.dc_pin = dc_pin
         self.reset_pin = reset_pin
         self.spi = spidev.SpiDev()
@@ -121,6 +117,8 @@ class SSD1306:
         self.gpio.pinMode(self.dc_pin, self.gpio.OUTPUT)
         self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW)
         self.font = font5x8.Font5x8
+        self.buffer_rows = buffer_rows
+        self.buffer_cols = buffer_cols
         self.buffer = [0] * (self.buffer_cols * self.buffer_rows / 8)
 
     def reset(self):
@@ -138,45 +136,45 @@ class SSD1306:
         self.spi.writebytes(bytes)
         self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW)
         
-    def begin(self, vcc_state = SWITCHCAPVCC):
+    def begin(self, vcc_state = SWITCH_CAP_VCC):
         self.gpio.delay(1) # 1ms
         self.reset()
-        self.command(self.DISPLAYOFF)
-        self.command(self.SETDISPLAYCLOCKDIV, 0x80)
-        self.command(self.SETMULTIPLEX, 0x1F)
-        self.command(self.SETDISPLAYOFFSET, 0x00)
-        self.command(self.SETSTARTLINE | 0x00)
-        if (vcc_state == self.EXTERNALVCC):
-            self.command(self.CHARGEPUMP, 0x10)
+        self.command(self.DISPLAY_OFF)
+        self.command(self.SET_DISPLAY_CLOCK_DIV, 0x80)
+        self.command(self.SET_MULTIPLEX, 0x1F)
+        self.command(self.SET_DISPLAY_OFFSET, 0x00)
+        self.command(self.SET_START_LINE | 0x00)
+        if (vcc_state == self.EXTERNAL_VCC):
+            self.command(self.CHARGE_PUMP, 0x10)
         else:
-            self.command(self.CHARGEPUMP, 0x14)
-        self.command(self.MEMORYMODE, 0x00)
-        self.command(self.SEGREMAP | 0x01)
-        self.command(self.COMSCANDEC)
-        self.command(self.SETCOMPINS, 0x02)
-        self.command(self.SETCONTRAST, 0x8f)
-        if (vcc_state == self.EXTERNALVCC):
-            self.command(self.SETPRECHARGE, 0x22)
+            self.command(self.CHARGE_PUMP, 0x14)
+        self.command(self.SET_MEMORY_MODE, 0x00)
+        self.command(self.SEG_REMAP | 0x01)
+        self.command(self.COM_SCAN_DEC)
+        self.command(self.SET_COM_PINS, 0x02)
+        self.command(self.SET_CONTRAST, 0x8f)
+        if (vcc_state == self.EXTERNAL_VCC):
+            self.command(self.SET_PRECHARGE, 0x22)
         else:
-            self.command(self.SETPRECHARGE, 0xF1)
-        self.command(self.SETVCOMDETECT, 0x40)
-        self.command(self.DISPLAYALLON_RESUME)
-        self.command(self.NORMALDISPLAY)
-        self.command(self.DISPLAYON)
+            self.command(self.SET_PRECHARGE, 0xF1)
+        self.command(self.SET_VCOM_DETECT, 0x40)
+        self.command(self.DISPLAY_ALL_ON_RESUME)
+        self.command(self.NORMAL_DISPLAY)
+        self.command(self.DISPLAY_ON)
         
     def clear_display(self):
         for i in range(0,len(self.buffer)):
             self.buffer[i] = 0
 
     def invert_display(self):
-        self.command(self.INVERTDISPLAY)
+        self.command(self.INVERT_DISPLAY)
 
     def normal_display(self):
-        self.command(self.NORMALDISPLAY)
+        self.command(self.NORMAL_DISPLAY)
 
     def display(self):
-        self.command(self.SETLOWCOLUMN | 0x0)
-        self.command(self.SETHIGHCOLUMN | 0x0)
+        self.command(self.SET_LOW_COLUMN | 0x0)
+        self.command(self.SET_HIGH_COLUMN | 0x0)
         self.data(self.buffer)
 
     def start_scroll_right(self, start, stop):
