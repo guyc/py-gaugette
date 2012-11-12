@@ -119,7 +119,10 @@ class SSD1306:
         self.font = font5x8.Font5x8
         self.buffer_rows = buffer_rows
         self.buffer_cols = buffer_cols
-        self.buffer = [0] * (self.buffer_cols * self.buffer_rows / 8)
+        self.col_offset = 0
+        self.bytes_per_col = buffer_rows / 8
+        self.mem_bytes = self.rows * self.cols * 2 / 8 # total bytes in SSD1306 display ram
+        self.buffer = [0] * (self.buffer_cols * self.bytes_per_col)
 
     def reset(self):
         self.gpio.digitalWrite(self.reset_pin, self.gpio.LOW)
@@ -175,18 +178,47 @@ class SSD1306:
     def display(self):
         self.command(self.SET_LOW_COLUMN | 0x0)
         self.command(self.SET_HIGH_COLUMN | 0x0)
-        self.data(self.buffer)
+        self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
+        start = self.col_offset * self.bytes_per_col
+        length = self.mem_bytes # automatically trucated if few bytes available in self.buffer
+        self.data(self.buffer[start:start+length])
 
+    def display_cols(self, start_col, count):
+        self.command(self.SET_LOW_COLUMN | (start_col & 0xF))
+        self.command(self.SET_HIGH_COLUMN | (start_col >> 4 & 0x0F))
+        self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
+        start = (self.col_offset + start_col) * self.bytes_per_col
+        length = count * self.bytes_per_col
+        self.data(self.buffer[start:start+length])
+                  
     def start_scroll_right(self, start, stop):
         pass
 
+    # Pixels are stored in column-major order!
+    # This makes it easy to reference a vertical slice of the display buffer
+    # and we use the to achieve reasonable performance vertical scrolling 
+    # without hardware support.
+    # 
+    #  If the self.buffer_rows = 64, then the bytes are arranged on
+    #  the screen like this:
+    #
+    #  0  8 ...
+    #  1  9
+    #  2 10
+    #  3 11
+    #  4 12
+    #  5 13
+    #  6 14
+    #  7 15
+    #
+    
     def draw_pixel(self, x, y, on=True):
         if (x<0 or x>=self.buffer_cols or y<0 or y>=self.buffer_rows):
             return
         mem_col = x
         mem_row = y / 8
         bit_mask = 1 << (y % 8)
-        offset = mem_row * self.buffer_cols + mem_col
+        offset = mem_row + self.buffer_rows/8 * mem_col
 
         if on:
             self.buffer[offset] |= bit_mask
@@ -268,3 +300,7 @@ class SSD1306:
                             p+=1
                     offset += bytes_per_row
           
+        if prev_char != None:
+            x += prev_width
+
+        return x
