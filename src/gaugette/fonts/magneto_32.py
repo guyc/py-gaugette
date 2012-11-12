@@ -1,4 +1,4 @@
-# Module magneto_bold_32
+# Module gaugette.fonts.magneto_bold_32
 # generated from Magneto 23.25pt
 
 name        = "Magneto 32"

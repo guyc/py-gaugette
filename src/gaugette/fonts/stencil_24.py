@@ -1,4 +1,4 @@
-# Module stencil_24
+# Module gaugette.fonts.stencil_24
 # generated from Stencil 24pt
 
 name        = "Stencil 24"

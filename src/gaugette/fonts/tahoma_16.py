@@ -1,4 +1,4 @@
-# Module tahoma_16
+# Module gaugette.fonts.tahoma_16
 # generated from Tahoma 12pt
 
 name        = "Tahoma 16"

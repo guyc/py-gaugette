@@ -1,4 +1,4 @@
-# Module arial_32
+# Module gaugette.fonts.arial_32
 # generated from Arial 24.75pt
 
 name        = "Arial 32"

@@ -1,4 +1,4 @@
-# Module verdana_15
+# Module gaugette.fonts.verdana_15
 # generated from Verdana 12pt
 
 name        = "Verdana 15"

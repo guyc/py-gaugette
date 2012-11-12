@@ -1,4 +1,4 @@
-# Module arial_narrow_16
+# Module gaugette.fonts.arial_narrow_16
 
 name        = "Arial Narrow 16"
 start_char  = '!'

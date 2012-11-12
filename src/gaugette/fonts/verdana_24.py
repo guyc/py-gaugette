@@ -1,4 +1,4 @@
-# Module verdana_24
+# Module gaugette.fonts.verdana_24
 # generated from Verdana 18pt
 
 name        = "Verdana 24"

@@ -1,4 +1,4 @@
-# Module arial_16
+# Module gaugette.fonts.arial_16
 # generated from Arial 12pt
 
 name        = "Arial 16"

@@ -1,4 +1,4 @@
-# Module old_english_text_mt_30
+# Module gaugette.fonts.old_english_text_mt_30
 # generated from Old English Text MT 24pt
 
 name        = "Old English Text MT 30"

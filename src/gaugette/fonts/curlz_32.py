@@ -1,4 +1,4 @@
-# Module curlz_mt_32
+# Module gaugette.fonts.curlz_mt_32
 # generated from Curlz MT 21.75pt
 
 name        = "Curlz MT 32"
