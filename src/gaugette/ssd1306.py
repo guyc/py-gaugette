@@ -176,23 +176,18 @@ class SSD1306:
         self.command(self.NORMAL_DISPLAY)
 
     def display(self):
-        self.command(self.SET_LOW_COLUMN | 0x0)
-        self.command(self.SET_HIGH_COLUMN | 0x0)
         self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
+        self.command(self.SET_COL_ADDRESS, 0, 127)
         start = self.col_offset * self.bytes_per_col
         length = self.mem_bytes # automatically trucated if few bytes available in self.buffer
         self.data(self.buffer[start:start+length])
 
     def display_cols(self, start_col, count):
-        self.command(self.SET_LOW_COLUMN | (start_col & 0xF))
-        self.command(self.SET_HIGH_COLUMN | (start_col >> 4 & 0x0F))
         self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
+        self.command(self.SET_COL_ADDRESS, start_col, (start_col + count) % self.cols)
         start = (self.col_offset + start_col) * self.bytes_per_col
         length = count * self.bytes_per_col
         self.data(self.buffer[start:start+length])
-                  
-    def start_scroll_right(self, start, stop):
-        pass
 
     # Pixels are stored in column-major order!
     # This makes it easy to reference a vertical slice of the display buffer
