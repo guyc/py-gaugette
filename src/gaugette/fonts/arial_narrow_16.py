@@ -1,5 +1,6 @@
-# ArialNarrow16 font
+# Module arial_narrow_16
 
+name        = "Arial Narrow 16"
 start_char  = '!'
 end_char    = '~'
 char_height = 16
