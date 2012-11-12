@@ -86,7 +86,7 @@ class OAuth:
             response = self.conn.getresponse()
             if (response.status == 200):
                 data = json.loads(response.read())
-                print data
+                # print data
                 if 'access_token' in data:
                     self.token = data
                     self.save_token()
