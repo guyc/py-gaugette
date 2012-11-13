@@ -7,9 +7,9 @@ Supports analog gauges, capacitance switches, RGB leds and other devices.
 Prerequisites
 =============
 
- - Modules that use GPIO require wiringpi.
- - gaugette.ssd1306 requires spidev.
- - gaugette.oauth2 requires Google's gdata.
+ - Modules that use GPIO require [WiringPi-Python](https://github.com/WiringPi/WiringPi-Python).
+ - gaugette.ssd1306 requires [spidev](https://github.com/doceme/py-spidev).
+ - gaugette.oauth2 requires [Google's gdata](http://code.google.com/p/gdata-python-client/).
 
 SSD1306 OLED Usage
 ==================
@@ -23,6 +23,15 @@ SSD1306 OLED Usage
     led.clear_display()
     led.draw_text2(0,0,'Hello World',2)
     led.display()
+```
+
+SSD1306 Font Usage
+==================
+
+```python
+    from gaugette.fonts import arial_16
+    font = arial_16  # fonts are modules, instance does not need to be instantiated
+    led.draw_text3(0,0,'Hello World',font)
 ```
 
 OAuth Usage
@@ -63,15 +72,6 @@ Rgb Led Usage
     led = gaugette.rgbled.RgbLed(R_PIN,R_PIN,B_PIN)
     led.set(0,50,100)
     led.fade(100,0,0)
-```
-
-Font Usage
-==========
-
-```python
-    from gaugette.fonts import arial_16
-    font = arial_16  # fonts are modules, instance does not need to be instantiated
-    led.draw_text3(0,0,'Hello World',font)
 ```
 
 Discussion At
