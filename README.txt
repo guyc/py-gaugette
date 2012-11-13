@@ -1,5 +1,5 @@
 ===============
-Gaugette Python
+Gaugette Python Library
 ===============
 
 A library for interfacing hardware with the Raspberry Pi.
