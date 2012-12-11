@@ -74,6 +74,35 @@ Rgb Led Usage
     led.fade(100,0,0)
 ```
 
+Rotary Encoder Usage
+====================
+
+```python
+    import gaugette.rotary_encoder
+    A_PIN = 7
+    B_PIN = 9
+    encoder = gaugette.rotary_encoder.RotaryEncoder(A_PIN, B_PIN)
+    while True:
+      delta = encoder.delta()
+      if delta!=0:
+        print "rotate %d" % delta
+```
+
+Switch Usage
+====================
+
+```python
+    import gaugette.switch
+    SW_PIN = 8
+    sw = gaugette.switch.Switch(SW_PIN)
+    last_state = sw.state()
+    while True:
+      state = sw.state()
+      if state != last_state:
+        print "switch %d" % state
+        last_state = state
+```
+
 Discussion At
 =============
 
