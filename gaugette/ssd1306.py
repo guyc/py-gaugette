@@ -189,6 +189,22 @@ class SSD1306:
         length = count * self.bytes_per_col
         self.data(self.buffer[start:start+length])
 
+
+    # Diagnostic print of the memory buffer to stdout 
+    def dump_buffer(self):
+        for y in range(0, self.buffer_rows):
+            mem_row = y/8
+            bit_mask = 1 << (y % 8)
+            line = ""
+            for x in range(0, self.buffer_cols):
+                mem_col = x
+                offset = mem_row + self.buffer_rows/8 * mem_col
+                if self.buffer[offset] & bit_mask:
+                    line += '*'
+                else:
+                    line += ' '
+            print('|'+line+'|')
+            
     # Pixels are stored in column-major order!
     # This makes it easy to reference a vertical slice of the display buffer
     # and we use the to achieve reasonable performance vertical scrolling 
@@ -299,3 +315,5 @@ class SSD1306:
             x += prev_width
 
         return x
+
+    
