@@ -123,6 +123,7 @@ class SSD1306:
         self.bytes_per_col = buffer_rows / 8
         self.mem_bytes = self.rows * self.cols * 2 / 8 # total bytes in SSD1306 display ram
         self.buffer = [0] * (self.buffer_cols * self.bytes_per_col)
+        self.flipped = False
 
     def reset(self):
         self.gpio.digitalWrite(self.reset_pin, self.gpio.LOW)
@@ -171,6 +172,15 @@ class SSD1306:
 
     def invert_display(self):
         self.command(self.INVERT_DISPLAY)
+
+    def flip_display(self, flipped=True):
+        self.flipped = flipped
+        if flipped:
+            self.command(self.COM_SCAN_INC)
+            self.command(self.SEG_REMAP | 0x00)
+        else:
+            self.command(self.COM_SCAN_DEC)
+            self.command(self.SET_COM_PINS, 0x02)
 
     def normal_display(self):
         self.command(self.NORMAL_DISPLAY)
