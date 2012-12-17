@@ -67,7 +67,7 @@ class RotaryEncoder:
         return r_state
 
     # Returns offset values of -2,-1,0,1,2
-    def delta(self):
+    def get_delta(self):
         delta = 0
         r_state = self.rotation_state()
         if r_state != self.r_state:
@@ -75,7 +75,7 @@ class RotaryEncoder:
             if delta==3:
                 delta = -1
             elif delta==2:
-                delta = math.copysign(delta, self.last_delta)  # same direction as previous, 2 steps
+                delta = int(math.copysign(delta, self.last_delta))  # same direction as previous, 2 steps
                 
             self.last_delta = delta
             self.r_state = r_state

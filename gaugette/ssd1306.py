@@ -185,6 +185,9 @@ class SSD1306:
     def normal_display(self):
         self.command(self.NORMAL_DISPLAY)
 
+    def set_contrast(self, contrast=0x7f):
+        self.command(self.SET_CONTRAST, contrast)
+
     def display(self):
         self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
         self.command(self.SET_COL_ADDRESS, 0, 127)

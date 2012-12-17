@@ -9,7 +9,7 @@ class Switch:
         self.gpio.pinMode(self.pin, self.gpio.INPUT)
         self.gpio.pullUpDnControl(self.pin, self.gpio.PUD_UP)
 
-    def state(self):
+    def get_state(self):
         state = self.gpio.digitalRead(self.pin)
         # We are pulling-high and switching
         # to ground, so state will be 1 when the switch is open, and 0
