@@ -14,11 +14,11 @@ switch = gaugette.switch.Switch(SW_PIN)
 last_state = None
 
 while 1:
-    delta = encoder.delta()
+    delta = encoder.get_delta()
     if delta!=0:
         print "rotate %d" % delta
 
-    sw_state = switch.state()
+    sw_state = switch.get_state()
     if sw_state != last_state:
         print "switch %d" % sw_state
         last_state = sw_state
