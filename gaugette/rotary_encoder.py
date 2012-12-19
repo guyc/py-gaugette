@@ -25,6 +25,8 @@
 
 import wiringpi
 import math
+import threading
+import time
 
 class RotaryEncoder:
 
@@ -81,3 +83,25 @@ class RotaryEncoder:
             self.r_state = r_state
 
         return delta
+
+    class Worker(threading.Thread):
+        def __init__(self, a_pin, b_pin):
+            threading.Thread.__init__(self)
+            self.lock = threading.Lock()
+            self.encoder = RotaryEncoder(a_pin, b_pin)
+            self.daemon = True
+            self.delta = 0
+
+        def run(self):
+            while True:
+                delta = self.encoder.get_delta()
+                with self.lock:
+                    self.delta += delta
+                time.sleep(0.001)
+
+        def get_delta(self):
+            # revisit - should use locking
+            with self.lock:
+                delta = self.delta
+                self.delta = 0
+            return delta
