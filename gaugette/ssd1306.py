@@ -197,11 +197,35 @@ class SSD1306:
 
     def display_cols(self, start_col, count):
         self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
-        self.command(self.SET_COL_ADDRESS, start_col, (start_col + count) % self.cols)
+        self.command(self.SET_COL_ADDRESS, start_col, (start_col + count - 1) % self.cols)
         start = (self.col_offset + start_col) * self.bytes_per_col
         length = count * self.bytes_per_col
         self.data(self.buffer[start:start+length])
 
+    # Transfers data from the passed buffer (not self.buffer!)
+    # starting at row <row> col <col>.  Note that in vertical addressing
+    # mode both row and row_count will be divided by 8 to get page addresses,
+    # so both must divide evenly by 8 to avoid surprises.
+    # buffer:  bitmap in column-major order (vertical addressing mode)
+    #          The number of rows in the buffer must be a multiple of 8.
+    # row:     Starting row to write to - must be multiple of 8
+    # row_count: Number of rows to write - must be multiple of 8
+    # col:     Starting col to write to.
+    # col_count: Number of cols to write.
+    #  
+    def display_block(self, buffer, row, row_count, col, col_count, col_offset=0):
+        # page_count is equal to bytes per column
+        page_count = row_count >> 3
+        page_start = row >> 3
+        page_end   = page_start + page_count - 1
+        col_start  = col
+        col_end    = col + col_count - 1
+        self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
+        self.command(self.SET_PAGE_ADDRESS, page_start, page_end)
+        self.command(self.SET_COL_ADDRESS, col_start, col_end)
+        start = col_offset * page_count
+        length = col_count * page_count
+        self.data(buffer[start:start+length])
 
     # Diagnostic print of the memory buffer to stdout 
     def dump_buffer(self):
