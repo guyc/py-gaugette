@@ -25,6 +25,8 @@
 
 import wiringpi
 import math
+import threading
+import time
 
 class RotaryEncoder:
 
@@ -67,7 +69,7 @@ class RotaryEncoder:
         return r_state
 
     # Returns offset values of -2,-1,0,1,2
-    def delta(self):
+    def get_delta(self):
         delta = 0
         r_state = self.rotation_state()
         if r_state != self.r_state:
@@ -75,9 +77,31 @@ class RotaryEncoder:
             if delta==3:
                 delta = -1
             elif delta==2:
-                delta = math.copysign(delta, self.last_delta)  # same direction as previous, 2 steps
+                delta = int(math.copysign(delta, self.last_delta))  # same direction as previous, 2 steps
                 
             self.last_delta = delta
             self.r_state = r_state
 
         return delta
+
+    class Worker(threading.Thread):
+        def __init__(self, a_pin, b_pin):
+            threading.Thread.__init__(self)
+            self.lock = threading.Lock()
+            self.encoder = RotaryEncoder(a_pin, b_pin)
+            self.daemon = True
+            self.delta = 0
+
+        def run(self):
+            while True:
+                delta = self.encoder.get_delta()
+                with self.lock:
+                    self.delta += delta
+                time.sleep(0.001)
+
+        def get_delta(self):
+            # revisit - should use locking
+            with self.lock:
+                delta = self.delta
+                self.delta = 0
+            return delta

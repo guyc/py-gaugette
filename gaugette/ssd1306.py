@@ -106,6 +106,8 @@ class SSD1306:
     def __init__(self, bus=0, device=0, dc_pin=1, reset_pin=2, buffer_rows=64, buffer_cols=128):
         self.cols = 128
         self.rows = 32
+        self.buffer_rows = 64
+        self.mem_bytes = self.buffer_rows * self.cols / 8 # total bytes in SSD1306 display ram
         self.dc_pin = dc_pin
         self.reset_pin = reset_pin
         self.spi = spidev.SpiDev()
@@ -117,12 +119,9 @@ class SSD1306:
         self.gpio.pinMode(self.dc_pin, self.gpio.OUTPUT)
         self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW)
         self.font = font5x8.Font5x8
-        self.buffer_rows = buffer_rows
-        self.buffer_cols = buffer_cols
         self.col_offset = 0
-        self.bytes_per_col = buffer_rows / 8
-        self.mem_bytes = self.rows * self.cols * 2 / 8 # total bytes in SSD1306 display ram
-        self.buffer = [0] * (self.buffer_cols * self.bytes_per_col)
+        self.bitmap = self.Bitmap(buffer_cols, buffer_rows)
+        self.flipped = False
 
     def reset(self):
         self.gpio.digitalWrite(self.reset_pin, self.gpio.LOW)
@@ -166,75 +165,63 @@ class SSD1306:
         self.command(self.DISPLAY_ON)
         
     def clear_display(self):
-        for i in range(0,len(self.buffer)):
-            self.buffer[i] = 0
+    	self.bitmap.clear()
 
     def invert_display(self):
         self.command(self.INVERT_DISPLAY)
 
+    def flip_display(self, flipped=True):
+        self.flipped = flipped
+        if flipped:
+            self.command(self.COM_SCAN_INC)
+            self.command(self.SEG_REMAP | 0x00)
+        else:
+            self.command(self.COM_SCAN_DEC)
+            self.command(self.SET_COM_PINS, 0x02)
+
     def normal_display(self):
         self.command(self.NORMAL_DISPLAY)
 
+    def set_contrast(self, contrast=0x7f):
+        self.command(self.SET_CONTRAST, contrast)
+
     def display(self):
-        self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
-        self.command(self.SET_COL_ADDRESS, 0, 127)
-        start = self.col_offset * self.bytes_per_col
-        length = self.mem_bytes # automatically trucated if few bytes available in self.buffer
-        self.data(self.buffer[start:start+length])
+    	self.display_block(self.bitmap, 0, 0, self.cols)
 
     def display_cols(self, start_col, count):
-        self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
-        self.command(self.SET_COL_ADDRESS, start_col, (start_col + count) % self.cols)
-        start = (self.col_offset + start_col) * self.bytes_per_col
-        length = count * self.bytes_per_col
-        self.data(self.buffer[start:start+length])
+        self.display_block(self.bitmap, 0, start_col, count)
 
+    # Transfers data from the passed bitmap (instance of ssd1306.Bitmap)
+    # starting at row <row> col <col>.
+    # Both row and bitmap.rows will be divided by 8 to get page addresses,
+    # so both must divide evenly by 8 to avoid surprises.
+    #
+    # bitmap:     instance of Bitmap
+    #             The number of rows in the bitmap must be a multiple of 8.
+    # row:        Starting row to write to - must be multiple of 8
+    # col:        Starting col to write to.
+    # col_count:  Number of cols to write.
+    # col_offset: column offset in buffer to write from
+    #  
+    def display_block(self, bitmap, row, col, col_count, col_offset=0):
+        page_count = bitmap.rows >> 3
+        page_start = row >> 3
+        page_end   = page_start + page_count - 1
+        col_start  = col
+        col_end    = col + col_count - 1
+        self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
+        self.command(self.SET_PAGE_ADDRESS, page_start, page_end)
+        self.command(self.SET_COL_ADDRESS, col_start, col_end)
+        start = col_offset * page_count
+        length = col_count * page_count
+        self.data(bitmap.data[start:start+length])
 
     # Diagnostic print of the memory buffer to stdout 
     def dump_buffer(self):
-        for y in range(0, self.buffer_rows):
-            mem_row = y/8
-            bit_mask = 1 << (y % 8)
-            line = ""
-            for x in range(0, self.buffer_cols):
-                mem_col = x
-                offset = mem_row + self.buffer_rows/8 * mem_col
-                if self.buffer[offset] & bit_mask:
-                    line += '*'
-                else:
-                    line += ' '
-            print('|'+line+'|')
-            
-    # Pixels are stored in column-major order!
-    # This makes it easy to reference a vertical slice of the display buffer
-    # and we use the to achieve reasonable performance vertical scrolling 
-    # without hardware support.
-    # 
-    #  If the self.buffer_rows = 64, then the bytes are arranged on
-    #  the screen like this:
-    #
-    #  0  8 ...
-    #  1  9
-    #  2 10
-    #  3 11
-    #  4 12
-    #  5 13
-    #  6 14
-    #  7 15
-    #
-    
-    def draw_pixel(self, x, y, on=True):
-        if (x<0 or x>=self.buffer_cols or y<0 or y>=self.buffer_rows):
-            return
-        mem_col = x
-        mem_row = y / 8
-        bit_mask = 1 << (y % 8)
-        offset = mem_row + self.buffer_rows/8 * mem_col
+        self.bitmap.dump()
 
-        if on:
-            self.buffer[offset] |= bit_mask
-        else:
-            self.buffer[offset] &= (0xFF - bit_mask)
+    def draw_pixel(self, x, y, on=True):
+        self.bitmap.draw_pixel(x,y,on)
         
     def draw_text(self, x, y, string):
         font_bytes = self.font.bytes
@@ -271,49 +258,176 @@ class SSD1306:
                 x += size
             x += space
 
-
     def clear_block(self, x0,y0,dx,dy):
-        for x in range(x0,x0+dx):
-            for y in range(y0,y0+dy):
-                self.draw_pixel(x,y,0)
+        self.bitmap.clear_block(x0,y0,dx,dy)
         
     def draw_text3(self, x, y, string, font):
-        height = font.char_height
-        prev_char = None
+        self.bitmap.draw_text(x,y,string,font)
 
-        for c in string:
-            if (c<font.start_char or c>font.end_char):
-                if prev_char != None:
-                    x += font.space_width + prev_width + font.gap_width
-                prev_char = None
-            else:
-                pos = ord(c) - ord(font.start_char)
-                (width,offset) = font.descriptors[pos]
+    class Bitmap:
+    
+        # Pixels are stored in column-major order!
+        # This makes it easy to reference a vertical slice of the display buffer
+        # and we use the to achieve reasonable performance vertical scrolling 
+        # without hardware support.
+        def __init__(self, cols, rows):
+            self.rows = rows
+            self.cols = cols
+            self.bytes_per_col = rows / 8
+            self.data = [0] * (self.cols * self.bytes_per_col)
+    
+        def clear(self):
+	    for i in range(0,len(self.data)):
+            	self.data[i] = 0
 
-                if prev_char != None:
-                    x += font.kerning[prev_char][pos] + font.gap_width
-                    
-                prev_char = pos
-                prev_width = width
+        # Diagnostic print of the memory buffer to stdout 
+        def dump(self):
+            for y in range(0, self.rows):
+                mem_row = y/8
+                bit_mask = 1 << (y % 8)
+                line = ""
+                for x in range(0, self.cols):
+                    mem_col = x
+                    offset = mem_row + self.rows/8 * mem_col
+                    if self.data[offset] & bit_mask:
+                        line += '*'
+                    else:
+                        line += ' '
+                print('|'+line+'|')
                 
-                bytes_per_row = (width + 7) / 8
-                for row in range(0,height):
-                    py = y + row
-                    mask = 0x80
-                    p = offset
-                    for col in range(0,width):
-                        px = x + col
-                        if (font.bitmaps[p] & mask):
-                            self.draw_pixel(px,py,1)  # for kerning, never draw black
-                        mask >>= 1
-                        if mask == 0:
-                            mask = 0x80
-                            p+=1
-                    offset += bytes_per_row
-          
-        if prev_char != None:
-            x += prev_width
+        def draw_pixel(self, x, y, on=True):
+            if (x<0 or x>=self.cols or y<0 or y>=self.rows):
+                return
+            mem_col = x
+            mem_row = y / 8
+            bit_mask = 1 << (y % 8)
+            offset = mem_row + self.rows/8 * mem_col
+    
+            if on:
+                self.data[offset] |= bit_mask
+            else:
+                self.data[offset] &= (0xFF - bit_mask)
+    
+        def clear_block(self, x0,y0,dx,dy):
+            for x in range(x0,x0+dx):
+                for y in range(y0,y0+dy):
+                    self.draw_pixel(x,y,0)
+              
+        def draw_text(self, x, y, string, font):
+            height = font.char_height
+            prev_char = None
+    
+            for c in string:
+                if (c<font.start_char or c>font.end_char):
+                    if prev_char != None:
+                        x += font.space_width + prev_width + font.gap_width
+                    prev_char = None
+                else:
+                    pos = ord(c) - ord(font.start_char)
+                    (width,offset) = font.descriptors[pos]
+    
+                    if prev_char != None:
+                        x += font.kerning[prev_char][pos] + font.gap_width
+                        
+                    prev_char = pos
+                    prev_width = width
+                    
+                    bytes_per_row = (width + 7) / 8
+                    for row in range(0,height):
+                        py = y + row
+                        mask = 0x80
+                        p = offset
+                        for col in range(0,width):
+                            px = x + col
+                            if (font.bitmaps[p] & mask):
+                                self.draw_pixel(px,py,1)  # for kerning, never draw black
+                            mask >>= 1
+                            if mask == 0:
+                                mask = 0x80
+                                p+=1
+                        offset += bytes_per_row
+              
+            if prev_char != None:
+                x += prev_width
+    
+            return x
 
-        return x
-
+    # This is a helper class to display a scrollable list of text lines.
+    # The list must have at least 1 item.
+    class ScrollingList:
+        def __init__(self, ssd1306, list, font):
+            self.ssd1306 = ssd1306
+            self.list = list
+            self.font = font
+            self.position = 0 # row index into list, 0 to len(list) * self.rows - 1
+            self.offset = 0   # led hardware scroll offset
+            self.pan_row = -1
+            self.pan_offset = 0
+            self.pan_direction = 1
+            self.bitmaps = []
+            self.rows = ssd1306.rows
+            self.cols = ssd1306.cols
+            self.bufrows = self.rows * 2
+            downset = (self.rows - font.char_height)/2
+            for text in list:
+                width = ssd1306.cols
+                text_bitmap = ssd1306.Bitmap(width, self.rows)
+                width = text_bitmap.draw_text(0,downset,text,font)
+                if width > 128:
+                    text_bitmap = ssd1306.Bitmap(width+15, self.rows)
+                    text_bitmap.draw_text(0,downset,text,font)
+                self.bitmaps.append(text_bitmap)
+                
+            # display the first word in the first position
+            self.ssd1306.display_block(self.bitmaps[0], 0, 0, self.cols)
+    
+        # how many steps to the nearest home position
+        def home_offset(self):
+            pos = self.position % self.rows
+            delta = (pos + 15) % self.rows - 15
+            return delta
+    
+        # scroll up or down.  Does multiple one-pixel scrolls if delta is not >1 or <-1
+        def scroll(self, delta):
+            if delta == 0:
+                return
+    
+            count = len(self.list)
+            step = cmp(delta, 0)
+            for i in range(0,delta, step):
+                if (self.position % self.rows) == 0:
+                    n = self.position / self.rows
+                    # at even boundary, need to update hidden row
+                    m = (n + step + count) % count
+                    row = (self.offset + self.rows) % self.bufrows
+                    self.ssd1306.display_block(self.bitmaps[m], row, 0, self.cols)
+                    if m == self.pan_row:
+                        self.pan_offset = 0
+                self.offset = (self.offset + self.bufrows + step) % self.bufrows
+                self.ssd1306.command(self.ssd1306.SET_START_LINE | self.offset)
+                max_position = count * self.rows
+                self.position = (self.position + max_position + step) % max_position
+    
+        # pans the current row back and forth repeatedly.
+        # Note that this currently only works if we are at a home position.
+        def auto_pan(self):
+            n = self.position / self.rows
+            if n != self.pan_row:
+                self.pan_row = n
+                self.pan_offset = 0
+                
+            text_bitmap = self.bitmaps[n]
+            if text_bitmap.cols > self.cols:
+                row = self.offset # this only works if we are at a home position
+                if self.pan_direction > 0:
+                    if self.pan_offset <= (text_bitmap.cols - self.cols):
+                        self.pan_offset += 1
+                    else:
+                        self.pan_direction = -1
+                else:
+                    if self.pan_offset > 0:
+                        self.pan_offset -= 1
+                    else:
+                        self.pan_direction = 1
+                self.ssd1306.display_block(text_bitmap, row, 0, self.cols, self.pan_offset)
     

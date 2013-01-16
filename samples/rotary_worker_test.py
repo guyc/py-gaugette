@@ -9,7 +9,8 @@ A_PIN  = 7
 B_PIN  = 9
 SW_PIN = 8
 
-encoder = gaugette.rotary_encoder.RotaryEncoder(A_PIN, B_PIN)
+encoder = gaugette.rotary_encoder.RotaryEncoder.Worker(A_PIN, B_PIN)
+encoder.start()
 switch = gaugette.switch.Switch(SW_PIN)
 last_state = None
 
