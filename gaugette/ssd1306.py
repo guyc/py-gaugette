@@ -384,8 +384,18 @@ class SSD1306:
         # how many steps to the nearest home position
         def home_offset(self):
             pos = self.position % self.rows
-            delta = (pos + 15) % self.rows - 15
-            return delta
+            midway = (self.rows/2)
+            delta = (pos + midway) % self.rows - midway
+            return -delta
+
+        def home(self, delay=0.005):
+            delta = self.home_offset()
+            steps = abs(delta)
+            sign = delta/steps
+            for i in range(0,steps):
+                if i>0 and delay>0:
+                    time.sleep(delay)
+                self.scroll(sign)
     
         # scroll up or down.  Does multiple one-pixel scrolls if delta is not >1 or <-1
         def scroll(self, delta):
