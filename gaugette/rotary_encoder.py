@@ -35,7 +35,7 @@ class RotaryEncoder:
     # STATE_TABLE maps these values back to sequence values [0,1,2,3]
     # Coincidentally the transformation table contains exactly the
     # r_state values, but it is just a coincidence that the transform
-    # is symmatrical - ie 
+    # is symmetrical - ie 
     #    sequence = STATE_TABLE[r_state]
     # and
     #    r_state = STATE_TABLE[sequence].
@@ -73,7 +73,7 @@ class RotaryEncoder:
         delta = 0
         r_state = self.rotation_state()
         if r_state != self.r_state:
-            delta = (self.STATE_TABLE[r_state] - self.STATE_TABLE[self.r_state] + 4) % 4
+            delta = (self.STATE_TABLE[r_state] - self.STATE_TABLE[self.r_state]) % 4
             if delta==3:
                 delta = -1
             elif delta==2:
