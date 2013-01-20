@@ -30,18 +30,6 @@ import time
 
 class RotaryEncoder:
 
-    # Turning the encoder clockwise generates these
-    # r_state values (binary):  00 01 11 10 
-    # STATE_TABLE maps these values back to sequence values [0,1,2,3]
-    # Coincidentally the transformation table contains exactly the
-    # r_state values, but it is just a coincidence that the transform
-    # is symmetrical - ie 
-    #    sequence = STATE_TABLE[r_state]
-    # and
-    #    r_state = STATE_TABLE[sequence].
-    # lookup table below, where sequence = STATE_TABLE[r_state]
-    STATE_TABLE = [ 0, 1, 3, 2 ]
-
     #----------------------------------------------------------------------
     # Pass the wiring pin numbers here.  See:
     #  https://projects.drogon.net/raspberry-pi/wiringpi/pins/
@@ -59,28 +47,49 @@ class RotaryEncoder:
         self.gpio.pullUpDnControl(self.b_pin, self.gpio.PUD_UP)
 
         self.last_delta = 0
-        self.r_state = self.rotation_state()
+        self.r_seq = self.rotation_sequence()
 
     # Gets the 2-bit rotation state of the current position
+    # This is deprecated - we now use rotation_sequence instead.
     def rotation_state(self):
         a_state = self.gpio.digitalRead(self.a_pin)
         b_state = self.gpio.digitalRead(self.b_pin)
         r_state = a_state | b_state << 1
         return r_state
 
+    # Returns the quadrature encoder state converted into
+    # a numerical sequence 0,1,2,3,0,1,2,3...
+    #    
+    # Turning the encoder clockwise generates these
+    # values for switches B and A:
+    #  B A
+    #  0 0
+    #  0 1
+    #  1 1
+    #  1 0 
+    # We convert these to an ordinal sequence number by returning
+    #   seq = (A ^ B) | B << 2
+    # 
+    def rotation_sequence(self):
+        a_state = self.gpio.digitalRead(self.a_pin)
+        b_state = self.gpio.digitalRead(self.b_pin)
+        r_seq = (a_state ^ b_state) | b_state << 1
+        return r_seq
+
     # Returns offset values of -2,-1,0,1,2
     def get_delta(self):
         delta = 0
-        r_state = self.rotation_state()
-        if r_state != self.r_state:
-            delta = (self.STATE_TABLE[r_state] - self.STATE_TABLE[self.r_state]) % 4
+        r_seq = self.rotation_sequence()
+        if r_seq != self.r_seq:
+            delta = (r_seq - self.r_seq) % 4
+            print [r_seq, self.r_seq, delta]
             if delta==3:
                 delta = -1
             elif delta==2:
                 delta = int(math.copysign(delta, self.last_delta))  # same direction as previous, 2 steps
                 
             self.last_delta = delta
-            self.r_state = r_state
+            self.r_seq = r_seq
 
         return delta
 
