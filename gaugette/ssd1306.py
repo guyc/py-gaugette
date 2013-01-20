@@ -382,20 +382,22 @@ class SSD1306:
             self.ssd1306.display_block(self.bitmaps[0], 0, 0, self.cols)
     
         # how many steps to the nearest home position
-        def home_offset(self):
+        def align_offset(self):
             pos = self.position % self.rows
             midway = (self.rows/2)
             delta = (pos + midway) % self.rows - midway
             return -delta
 
-        def home(self, delay=0.005):
-            delta = self.home_offset()
-            steps = abs(delta)
-            sign = delta/steps
-            for i in range(0,steps):
-                if i>0 and delay>0:
-                    time.sleep(delay)
-                self.scroll(sign)
+        def align(self, delay=0.005):
+            delta = self.align_offset()
+            if delta!=0:
+                steps = abs(delta)
+                sign = delta/steps
+                for i in range(0,steps):
+                    if i>0 and delay>0:
+                        time.sleep(delay)
+                    self.scroll(sign)
+            return self.position / self.rows
     
         # scroll up or down.  Does multiple one-pixel scrolls if delta is not >1 or <-1
         def scroll(self, delta):
