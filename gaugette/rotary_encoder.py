@@ -82,7 +82,6 @@ class RotaryEncoder:
         r_seq = self.rotation_sequence()
         if r_seq != self.r_seq:
             delta = (r_seq - self.r_seq) % 4
-            print [r_seq, self.r_seq, delta]
             if delta==3:
                 delta = -1
             elif delta==2:
