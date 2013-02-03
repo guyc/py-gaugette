@@ -103,10 +103,10 @@ class SSD1306:
     # We will keep d/c low and bump it high only for commands with data
     # reset is normally HIGH, and pulled LOW to reset the display
 
-    def __init__(self, bus=0, device=0, dc_pin=1, reset_pin=2, buffer_rows=64, buffer_cols=128):
-        self.cols = 128
-        self.rows = 32
-        self.buffer_rows = 64
+    def __init__(self, bus=0, device=0, dc_pin=1, reset_pin=2, buffer_rows=64, buffer_cols=128, rows=32, cols=128):
+        self.cols = cols
+        self.rows = rows
+        self.buffer_rows = buffer_rows
         self.mem_bytes = self.buffer_rows * self.cols / 8 # total bytes in SSD1306 display ram
         self.dc_pin = dc_pin
         self.reset_pin = reset_pin
