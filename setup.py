@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='gaugette',
-      version='1.0',
+      version='1.1',
       description='Python library for building embedded devices with the Raspberry Pi',
       author='Guy Carpenter',
       author_email='guy@clearwater.com.au',
