@@ -186,10 +186,10 @@ class SSD1306:
         self.command(self.SET_CONTRAST, contrast)
 
     def display(self):
-    	self.display_block(self.bitmap, 0, 0, self.cols)
+    	self.display_block(self.bitmap, 0, 0, self.cols, self.col_offset)
 
     def display_cols(self, start_col, count):
-        self.display_block(self.bitmap, 0, start_col, count)
+        self.display_block(self.bitmap, 0, start_col, count, self.col_offset)
 
     # Transfers data from the passed bitmap (instance of ssd1306.Bitmap)
     # starting at row <row> col <col>.
@@ -262,7 +262,7 @@ class SSD1306:
         self.bitmap.clear_block(x0,y0,dx,dy)
         
     def draw_text3(self, x, y, string, font):
-        self.bitmap.draw_text(x,y,string,font)
+        return self.bitmap.draw_text(x,y,string,font)
 
     class Bitmap:
     
