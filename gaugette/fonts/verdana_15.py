@@ -840,7 +840,7 @@ bitmaps = (
     0x60, 0xC0, #  OO     OO 
     0x1F, 0x00, #    OOOOO   
     0x02, 0x00, #       O    
-    0x02, 0x00, #       O    
+    0x03, 0x80, #       OOO  
 
     # @1035 'R' (10 pixels wide)
     0x00, 0x00, #           
@@ -1010,7 +1010,7 @@ bitmaps = (
     0x80, # O   
     0x80, # O   
     0x80, # O   
-    0x80, # O   
+    0xF0, # OOOO   
 
     # @1305 '\' (7 pixels wide)
     0x80, # O      
@@ -1044,7 +1044,7 @@ bitmaps = (
     0x10, #    O
     0x10, #    O
     0x10, #    O
-    0x10, #    O
+    0xF0, # OOOO
 
     # @1335 '^' (10 pixels wide)
     0x00, 0x00, #           
