@@ -108,3 +108,27 @@ Discussion At
 
 [http://guy.carpenter.id.au/gaugette/](http://guy.carpenter.id.au/gaugette/)
 
+Using This Module In Your Code
+==============================
+
+You can use this code by checking it out into your source directory as follows:
+
+```
+cd myApplication
+git clone git://github.com/guyc/py-gaugette.git
+ln -s py-gaugette/gaugette gaugette
+```
+The soft link is created so that the local directory `gaugette` will point to 
+`py-gaugette/gaugette` which simplifies your import statements.
+
+Alternatively if you want to install this module as a system-wide python module, you can
+do so as follows:
+
+```
+cd myPythonStuff
+git clone git://github.com/guyc/py-gaugette.git
+cd py-gaugette
+sudo python setup.py install
+```
+
+
