@@ -2,11 +2,15 @@
 
 import sys
 import urllib
-import httplib
+try:
+    import httplib # python2
+except ImportError:
+    import http.client # python3
 import os.path
 import json
 import time
 import gdata.spreadsheet.service
+import gdata.docs.service
 
 class OAuth:
 
@@ -22,9 +26,15 @@ class OAuth:
             'https://docs.google.com/feeds',         # if an application needs to create spreadsheets, or otherwise manipulate their metadata,
         ]
         self.host = 'accounts.google.com'
+        self.reset_connection()
+        self.load_token()
+
+    # this setup is isolated because it eventually generates a BadStatusLine
+    # exception, after which we always get httplib.CannotSendRequest errors.
+    #  When this happens, we try re-creating the exception.
+    def reset_connection(self):
         # httplib.HTTPConnection.debuglevel = 1
         self.conn = httplib.HTTPSConnection(self.host)
-        self.load_token()
 
     def load_token(self):
         token = None
@@ -60,8 +70,8 @@ class OAuth:
             self.verification_url = data['verification_url']
             self.retry_interval = data['interval']
         else:
-            print response.status
-            print response.read()
+            print(response.status)
+            print(response.read())
             sys.exit()
         return self.user_code
     
@@ -128,3 +138,11 @@ class OAuth:
         }
         client = gdata.spreadsheet.service.SpreadsheetsService(additional_headers=headers)
         return client
+
+    def docs_service(self):
+        headers = {
+            "Authorization": "%s %s" % (self.token['token_type'], self.token['access_token'])
+        }
+        client = gdata.docs.service.DocsService(additional_headers=headers)
+        return client
+        
