@@ -16,8 +16,8 @@
 # The datasheet for the SSD1306 is available
 #   http://www.adafruit.com/datasheets/SSD1306.pdf
 #
-# WiringPi pinout reference
-#   https://projects.drogon.net/raspberry-pi/wiringpi/pins/
+# Wiringpi2 pinout reference
+#   https://projects.drogon.net/raspberry-pi/wiringpi2/pins/
 #
 # Some important things to know about this device and SPI:
 #
@@ -38,8 +38,8 @@
 #
 #      RPi     SSD1306
 #      CE0   -> CS
-#      GPIO2 -> RST   (to use a different GPIO set reset_pin to wiringPi pin no)
-#      GPIO1 -> D/C   (to use a different GPIO set dc_pin to wiringPi pin no)
+#      GPIO2 -> RST   (to use a different GPIO set reset_pin to wiringpi2 pin no)
+#      GPIO1 -> D/C   (to use a different GPIO set dc_pin to wiringpi2 pin no)
 #      SCLK  -> CLK
 #      MOSI  -> DATA
 #      3.3V  -> VIN
@@ -48,7 +48,7 @@
 #----------------------------------------------------------------------
 
 import spidev
-import wiringpi
+import wiringpi2
 import time
 import font5x8
 import sys
@@ -113,7 +113,7 @@ class SSD1306:
         self.spi = spidev.SpiDev()
         self.spi.open(bus, device)
         self.spi.max_speed_hz = 500000
-        self.gpio = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
+        self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
         self.gpio.pinMode(self.reset_pin, self.gpio.OUTPUT)
         self.gpio.digitalWrite(self.reset_pin, self.gpio.HIGH)
         self.gpio.pinMode(self.dc_pin, self.gpio.OUTPUT)

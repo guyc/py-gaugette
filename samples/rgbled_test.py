@@ -1,8 +1,8 @@
 import gaugette.rgbled
 import time
-import wiringpi
+import wiringpi2
 
-io = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
+io = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
 
 led = gaugette.rgbled.RgbLed(4,6,5)
 led.fade(100,0,0,500)

@@ -1,9 +1,9 @@
-import wiringpi
+import wiringpi2
 
 class CapSwitch:
     def __init__(self, pin):
         self.pin = pin
-        self.gpio = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
+        self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
         self.gpio.pinMode(self.pin, self.gpio.OUTPUT)
         self.maxCycles = 100
         self.repeats = 2
