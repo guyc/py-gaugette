@@ -17,8 +17,8 @@ import gaugette.switch
 import math
 
 A_PIN  = 7
-B_PIN  = 8
-SW_PIN = 9
+B_PIN  = 9
+SW_PIN = 8
 
 encoder = gaugette.rotary_encoder.RotaryEncoder(A_PIN, B_PIN)
 switch = gaugette.switch.Switch(SW_PIN)
