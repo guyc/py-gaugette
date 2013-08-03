@@ -7,9 +7,32 @@ Supports analog gauges, capacitance switches, RGB leds and other devices.
 Prerequisites
 =============
 
- - Modules that use GPIO require [WiringPi-Python](https://github.com/WiringPi/WiringPi-Python).
- - gaugette.ssd1306 requires [spidev](https://github.com/doceme/py-spidev).
- - gaugette.oauth2 requires [Google's gdata](http://code.google.com/p/gdata-python-client/).
++++WiringPi and WiringPi2-Python
+
+Modules that use GPIO require [wiringpi](https://projects.drogon.net/raspberry-pi/wiringpi/) and [WiringPi2-Python](https://github.com/WiringPi/WiringPi2-Python).
+
+To install wiringpi:
+```
+git clone git://git.drogon.net/wiringPi
+cd wiringPi
+sudo ./build
+```
+
+To install wiringpi2-python:
+```
+git clone https://github.com/Gadgetoid/WiringPi2-Python.git
+cd WiringPi2-Python/
+sudo python setup.py install
+cd ..
+```
+
++++py-spidev
+
+gaugette.ssd1306 requires [spidev](https://github.com/doceme/py-spidev).
+
++++gdata-python-client
+
+gaugette.oauth2 requires [Google's gdata](http://code.google.com/p/gdata-python-client/).
 
 SSD1306 OLED Usage
 ==================
