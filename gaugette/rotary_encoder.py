@@ -23,7 +23,7 @@
 #       if delta!=0:
 #         print delta
 
-import wiringpi
+import wiringpi2
 import math
 import threading
 import time
@@ -32,13 +32,13 @@ class RotaryEncoder:
 
     #----------------------------------------------------------------------
     # Pass the wiring pin numbers here.  See:
-    #  https://projects.drogon.net/raspberry-pi/wiringpi/pins/
+    #  https://projects.drogon.net/raspberry-pi/wiringpi2/pins/
     #----------------------------------------------------------------------
     def __init__(self, a_pin, b_pin):
         self.a_pin = a_pin
         self.b_pin = b_pin
 
-        self.gpio = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
+        self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
 
         self.gpio.pinMode(self.a_pin, self.gpio.INPUT)
         self.gpio.pullUpDnControl(self.a_pin, self.gpio.PUD_UP)
