@@ -7,7 +7,7 @@ Supports analog gauges, capacitance switches, RGB leds and other devices.
 Prerequisites
 =============
 
-+++WiringPi and WiringPi2-Python
+### WiringPi and WiringPi2-Python
 
 Modules that use GPIO require [wiringpi](https://projects.drogon.net/raspberry-pi/wiringpi/) and [WiringPi2-Python](https://github.com/WiringPi/WiringPi2-Python).
 
@@ -26,11 +26,11 @@ sudo python setup.py install
 cd ..
 ```
 
-+++py-spidev
+### py-spidev
 
 gaugette.ssd1306 requires [spidev](https://github.com/doceme/py-spidev).
 
-+++gdata-python-client
+### gdata-python-client
 
 gaugette.oauth2 requires [Google's gdata](http://code.google.com/p/gdata-python-client/).
 
