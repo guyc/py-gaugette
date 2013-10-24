@@ -49,6 +49,8 @@ class RotaryEncoder:
         self.last_delta = 0
         self.r_seq = self.rotation_sequence()
 
+        self.remainder = 0 # for scaled deltas
+
     # Gets the 2-bit rotation state of the current position
     # This is deprecated - we now use rotation_sequence instead.
     def rotation_state(self):
@@ -91,6 +93,22 @@ class RotaryEncoder:
             self.r_seq = r_seq
 
         return delta
+
+    def get_scaled_delta(self, scale):
+        # python negatives are weird
+        #   -1 / 2 = -1 (not 0)
+        #   -1 % 2 =  1 (not -1)
+        # // is integer division operator 
+        # which avoids the changes in the /
+        # operator on integers between python 2 and 3.
+        self.remainder += self.delta() 
+        if self.remainder >= 0:
+            scaled_delta = self.remainder // scale
+            self.remainder %= scale
+        else:  
+            scaled_delta = -(-self.remainder // scale)
+            self.remainder = -(-self.remainder%scale)
+        return scaled_delta
 
     class Worker(threading.Thread):
         def __init__(self, a_pin, b_pin):
