@@ -29,6 +29,11 @@ last_delta = 0
 last_sequence = encoder.rotation_sequence()
 last_heading = 0
 
+# for coarser granularity reading
+steps_per_cycle = 4 # arbitrary, usually equal to steps per detent
+remainder = steps_per_cycle//2
+
+
 # NOTE: the library includes individual calls to get
 # the rotation_state, rotation_sequence and delta values.  
 # However this demo only reads the rotation_state and locally
@@ -49,7 +54,7 @@ while True:
 
         # print a heading every 20 lines
         if last_heading % 20 == 0:
-          print "A B STATE SEQ DELTA SWITCH"
+          print "A B STATE SEQ DELTA CYCLES SWITCH"
         last_heading += 1
 
         # extract individual signal bits for A and B
@@ -73,4 +78,8 @@ while True:
         last_delta = delta
         last_sequence = sequence
 
-        print '%1d %1d %3d %4d %4d %4d' % (a_state, b_state, state, sequence, delta, switch_state)
+        remainder += delta
+        cycles = remainder // steps_per_cycle
+        remainder %= steps_per_cycle
+
+        print '%1d %1d %3d %4d %4d %4d %4d' % (a_state, b_state, state, sequence, delta, cycles, switch_state)
