@@ -113,9 +113,9 @@ class RotaryEncoder:
         # // is integer division operator.  Note the behaviour of the / operator
         # when used on integers changed between python 2 and 3. 
         # See http://www.python.org/dev/peps/pep-0238/
-        self.remainder += self.delta() 
-        cycles = self.remainder // steps_per_cycle
-        self.remainder %= scale # remainder always remains positive
+        self.remainder += self.get_delta() 
+        cycles = self.remainder // self.steps_per_cycle
+        self.remainder %= self.steps_per_cycle # remainder always remains positive
         return cycles
 
     class Worker(threading.Thread):
