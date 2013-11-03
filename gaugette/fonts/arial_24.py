@@ -5,7 +5,7 @@
 
 name        = "Arial 24"
 start_char  = '!'
-end_char    = '°'
+end_char    = chr(127)
 char_height = 24
 space_width = 12
 gap_width   = 3
