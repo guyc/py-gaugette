@@ -1,5 +1,7 @@
+# coding=utf-8
 # Module arial_24
 # generated from Arial 18.75pt
+
 
 name        = "Arial 24"
 start_char  = '!'
