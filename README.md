@@ -57,6 +57,12 @@ SSD1306 Font Usage
     led.draw_text3(0,0,'Hello World',font)
 ```
 
+The fonts include the printable ASCII characters ('!' through '~') and because of the usefulness of the degree symbol '&deg;', it has been added as a non-standard character 127 (0x7F hex and 177 octal).  Use the degree symbol in a python literal like this: 
+```
+textSize = led.draw_text3(0,0,'451\177F', font)
+```
+
+
 OAuth Usage
 ===========
 
