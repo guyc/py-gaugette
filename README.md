@@ -60,7 +60,6 @@ SSD1306 Font Usage
     # text_width returns the width of the string in pixels, useful for centering:
     text_width = led.text_width('Hello World',font)
     x = (128-text_width)/2
-    # draw_text3 returns the width too.
     led.draw_text3(x,0,'Hello World',font)
 ```
 
