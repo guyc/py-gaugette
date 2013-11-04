@@ -53,15 +53,21 @@ SSD1306 Font Usage
 
 ```python
     from gaugette.fonts import arial_16
-    font = arial_16  # fonts are modules, instance does not need to be instantiated
-    led.draw_text3(0,0,'Hello World',font)
+    font = arial_16  # fonts are modules, does not need to be instantiated
+    # draw_text3 returns the col position following the printed text.
+    x = led.draw_text3(0,0,'Hello World',font)  
+
+    # text_width returns the width of the string in pixels, useful for centering:
+    text_width = led.text_width('Hello World',font)
+    x = (128-text_width)/2
+    # draw_text3 returns the width too.
+    led.draw_text3(x,0,'Hello World',font)
 ```
 
 The fonts include the printable ASCII characters ('!' through '~') and because of the usefulness of the degree symbol '&deg;', it has been added as a non-standard character 127 (0x7F hex and 177 octal).  Use the degree symbol in a python literal like this: 
-```
+```python
 textSize = led.draw_text3(0,0,'451\177F', font)
 ```
-
 
 OAuth Usage
 ===========
