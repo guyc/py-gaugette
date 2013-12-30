@@ -172,7 +172,7 @@ class SSD1306:
         self.command(self.DISPLAY_ON)
         
     def clear_display(self):
-    	self.bitmap.clear()
+        self.bitmap.clear()
 
     def invert_display(self):
         self.command(self.INVERT_DISPLAY)
@@ -193,7 +193,7 @@ class SSD1306:
         self.command(self.SET_CONTRAST, contrast)
 
     def display(self):
-    	self.display_block(self.bitmap, 0, 0, self.cols, self.col_offset)
+        self.display_block(self.bitmap, 0, 0, self.cols, self.col_offset)
 
     def display_cols(self, start_col, count):
         self.display_block(self.bitmap, 0, start_col, count, self.col_offset)
@@ -287,8 +287,8 @@ class SSD1306:
             self.data = [0] * (self.cols * self.bytes_per_col)
     
         def clear(self):
-	    for i in range(0,len(self.data)):
-            	self.data[i] = 0
+            for i in range(0,len(self.data)):
+                self.data[i] = 0
 
         # Diagnostic print of the memory buffer to stdout 
         def dump(self):
