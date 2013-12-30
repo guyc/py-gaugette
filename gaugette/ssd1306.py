@@ -143,7 +143,15 @@ class SSD1306:
         self.reset()
         self.command(self.DISPLAY_OFF)
         self.command(self.SET_DISPLAY_CLOCK_DIV, 0x80)
-        self.command(self.SET_MULTIPLEX, 0x1F)
+
+        # support for 128x32 and 128x64 line models
+        if self.rows == 64:
+            self.command(self.SET_MULTIPLEX, 0x3F) 
+            self.command(self.SET_COM_PINS, 0x12)
+        else:
+            self.command(self.SET_MULTIPLEX, 0x1F)
+            self.command(self.SET_COM_PINS, 0x02)
+            
         self.command(self.SET_DISPLAY_OFFSET, 0x00)
         self.command(self.SET_START_LINE | 0x00)
         if (vcc_state == self.EXTERNAL_VCC):
@@ -153,7 +161,6 @@ class SSD1306:
         self.command(self.SET_MEMORY_MODE, 0x00)
         self.command(self.SEG_REMAP | 0x01)
         self.command(self.COM_SCAN_DEC)
-        self.command(self.SET_COM_PINS, 0x02)
         self.command(self.SET_CONTRAST, 0x8f)
         if (vcc_state == self.EXTERNAL_VCC):
             self.command(self.SET_PRECHARGE, 0x22)
@@ -264,6 +271,9 @@ class SSD1306:
     def draw_text3(self, x, y, string, font):
         return self.bitmap.draw_text(x,y,string,font)
 
+    def text_width(self, string, font):
+        return self.bitmap.text_width(string, font)
+
     class Bitmap:
     
         # Pixels are stored in column-major order!
@@ -312,6 +322,28 @@ class SSD1306:
             for x in range(x0,x0+dx):
                 for y in range(y0,y0+dy):
                     self.draw_pixel(x,y,0)
+
+        # returns the width in pixels of the string allowing for kerning & interchar-spaces
+        def text_width(self, string, font):
+            x = 0
+            prev_char = None
+            for c in string:
+                if (c<font.start_char or c>font.end_char):
+                    if prev_char != None:
+                        x += font.space_width + prev_width + font.gap_width
+                    prev_char = None
+                else:
+                    pos = ord(c) - ord(font.start_char)
+                    (width,offset) = font.descriptors[pos]
+                    if prev_char != None:
+                        x += font.kerning[prev_char][pos] + font.gap_width
+                    prev_char = pos
+                    prev_width = width
+                    
+            if prev_char != None:
+                x += prev_width
+                
+            return x
               
         def draw_text(self, x, y, string, font):
             height = font.char_height
@@ -325,10 +357,8 @@ class SSD1306:
                 else:
                     pos = ord(c) - ord(font.start_char)
                     (width,offset) = font.descriptors[pos]
-    
                     if prev_char != None:
                         x += font.kerning[prev_char][pos] + font.gap_width
-                        
                     prev_char = pos
                     prev_width = width
                     
