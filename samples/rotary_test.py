@@ -54,7 +54,7 @@ while True:
 
         # print a heading every 20 lines
         if last_heading % 20 == 0:
-          print "A B STATE SEQ DELTA CYCLES SWITCH"
+          print ("A B STATE SEQ DELTA CYCLES SWITCH")
         last_heading += 1
 
         # extract individual signal bits for A and B
@@ -82,4 +82,4 @@ while True:
         cycles = remainder // steps_per_cycle
         remainder %= steps_per_cycle
 
-        print '%1d %1d %3d %4d %4d %4d %4d' % (a_state, b_state, state, sequence, delta, cycles, switch_state)
+        print ('%1d %1d %3d %4d %4d %4d %4d' % (a_state, b_state, state, sequence, delta, cycles, switch_state))
