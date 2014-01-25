@@ -47,8 +47,8 @@
 #      GND   -> GND
 #----------------------------------------------------------------------
 
-import spidev
-import wiringpi2
+import Adafruit_BBIO.GPIO as GPIO
+from Adafruit_BBIO.SPI import SPI
 import time
 import font5x8
 import sys
@@ -103,43 +103,48 @@ class SSD1306:
     # We will keep d/c low and bump it high only for commands with data
     # reset is normally HIGH, and pulled LOW to reset the display
 
-    def __init__(self, bus=0, device=0, dc_pin=1, reset_pin=2, buffer_rows=64, buffer_cols=128, rows=32, cols=128):
+    def __init__(self, bus=0, device=0, dc_pin="P9_15", reset_pin="P9_17", buffer_rows=64, buffer_cols=128, rows=32, cols=128):
         self.cols = cols
         self.rows = rows
         self.buffer_rows = buffer_rows
         self.mem_bytes = self.buffer_rows * self.cols / 8 # total bytes in SSD1306 display ram
         self.dc_pin = dc_pin
         self.reset_pin = reset_pin
-        self.spi = spidev.SpiDev()
-        self.spi.open(bus, device)
-        self.spi.max_speed_hz = 500000
-        self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
-        self.gpio.pinMode(self.reset_pin, self.gpio.OUTPUT)
-        self.gpio.digitalWrite(self.reset_pin, self.gpio.HIGH)
-        self.gpio.pinMode(self.dc_pin, self.gpio.OUTPUT)
-        self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW)
+        self.spi = SPI(bus, device)
+        self.gpio = GPIO
+        self.gpio.setup(self.reset_pin, self.gpio.OUT)
+        self.gpio.output(self.reset_pin, self.gpio.HIGH)
+        self.gpio.setup(self.dc_pin, self.gpio.OUT)
+        self.gpio.output(self.dc_pin, self.gpio.LOW)
         self.font = font5x8.Font5x8
         self.col_offset = 0
         self.bitmap = self.Bitmap(buffer_cols, buffer_rows)
         self.flipped = False
 
     def reset(self):
-        self.gpio.digitalWrite(self.reset_pin, self.gpio.LOW)
-        self.gpio.delay(10) # 10ms
-        self.gpio.digitalWrite(self.reset_pin, self.gpio.HIGH)
+        self.gpio.output(self.reset_pin, self.gpio.LOW)
+        time.sleep(0.010) # 10ms
+        self.gpio.output(self.reset_pin, self.gpio.HIGH)
 
     def command(self, *bytes):
         # already low
-        # self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW) 
+        # self.gpio.output(self.dc_pin, self.gpio.LOW) 
         self.spi.writebytes(list(bytes))
 
     def data(self, bytes):
-        self.gpio.digitalWrite(self.dc_pin, self.gpio.HIGH)
-        self.spi.writebytes(bytes)
-        self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW)
+        self.gpio.output(self.dc_pin, self.gpio.HIGH)
+	# chunk data to work around 255 byte limitation in adafruit implementation of writebytes
+	start = 0
+	remaining = len(bytes)
+	while remaining>0:
+	    count = remaining if remaining <= 255 else 255
+	    remaining -= count
+	    self.spi.writebytes(bytes[start:start+count])
+	    start += count
+        self.gpio.output(self.dc_pin, self.gpio.LOW)
         
     def begin(self, vcc_state = SWITCH_CAP_VCC):
-        self.gpio.delay(1) # 1ms
+        time.sleep(0.001) # 1ms
         self.reset()
         self.command(self.DISPLAY_OFF)
         self.command(self.SET_DISPLAY_CLOCK_DIV, 0x80)
