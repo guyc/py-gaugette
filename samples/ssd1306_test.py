@@ -3,7 +3,7 @@ import time
 import sys
 
 RESET_PIN = "P9_15"
-DC_PIN    = "P9_16"
+DC_PIN    = "P9_13"
 
 print("init")
 led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=64,cols=128)
@@ -40,8 +40,8 @@ while True:
         time.sleep(0.5)
         
     # vertically scroll to switch between buffers
+    print("scroll")
     for i in range(0,32):
         offset = (offset + 1) % 64
-	print("scroll")
         led.command(led.SET_START_LINE | offset)
         time.sleep(0.01)

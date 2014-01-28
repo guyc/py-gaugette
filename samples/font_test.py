@@ -49,10 +49,10 @@ from gaugette.fonts import curlz_32
 fonts += [curlz_22,
           curlz_32]
 
-RESET_PIN = 15
-DC_PIN    = 16
 
-led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, buffer_cols=256)
+RESET_PIN = "P9_15"
+DC_PIN    = "P9_13"
+led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=64,cols=128, buffer_cols=256)
 led.begin()
 led.clear_display()
 

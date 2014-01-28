@@ -136,8 +136,9 @@ class SSD1306:
 	# chunk data to work around 255 byte limitation in adafruit implementation of writebytes
 	start = 0
 	remaining = len(bytes)
+	max_xfer = 255  # revisit - change to 1024 when Adafruit_BBIO is fixed.
 	while remaining>0:
-	    count = remaining if remaining <= 255 else 255
+	    count = remaining if remaining <= max_xfer else max_xfer
 	    remaining -= count
 	    self.spi.writebytes(bytes[start:start+count])
 	    start += count
