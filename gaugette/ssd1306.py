@@ -16,8 +16,7 @@
 # The datasheet for the SSD1306 is available
 #   http://www.adafruit.com/datasheets/SSD1306.pdf
 #
-# Wiringpi2 pinout reference
-#   https://projects.drogon.net/raspberry-pi/wiringpi2/pins/
+# This is the BeagleBone Black version of the library
 #
 # Some important things to know about this device and SPI:
 #
@@ -34,17 +33,17 @@
 #   keep D/C LOW for the command byte including any following argument bytes.
 #   Pull D/C HIGH only when writting to the display memory buffer.
 #   
-# - The pin connections between the Raspberry Pi and OLED module are:
+# - The pin connections between the BeagleBone Black SPI0 and OLED module are:
 #
-#      RPi     SSD1306
-#      CE0   -> CS
-#      GPIO2 -> RST   (to use a different GPIO set reset_pin to wiringpi2 pin no)
-#      GPIO1 -> D/C   (to use a different GPIO set dc_pin to wiringpi2 pin no)
-#      SCLK  -> CLK
-#      MOSI  -> DATA
-#      3.3V  -> VIN
-#            -> 3.3Vo
-#      GND   -> GND
+#      BBB    SSD1306
+#      P9_17  -> CS
+#      P9_15  -> RST   (arbirary GPIO, change at will)
+#      P9_13  -> D/C   (arbirary GPIO, change at will)
+#      P9_22  -> CLK
+#      P9_18  -> DATA
+#      P9_3   -> VIN
+#      N/C    -> 3.3Vo
+#      P9_1   -> GND
 #----------------------------------------------------------------------
 
 import Adafruit_BBIO.GPIO as GPIO
