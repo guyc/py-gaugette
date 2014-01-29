@@ -2,21 +2,16 @@
 # ssd1306.py from https://github.com/guyc/py-gaugette
 # ported by Guy Carpenter, Clearwater Software
 #
-# This library is for the Adafruit 128x32 SPI monochrome OLED 
-# based on the SSD1306 driver.
-#   http://www.adafruit.com/products/661
-#
-# This library does not directly support the larger 128x64 module,
-# but could with minor changes.
+# This library works with 
+#   Adafruit's 128x32 SPI monochrome OLED   http://www.adafruit.com/products/661
+#   Adafruit's 128x64 SPI monochrome OLED   http://www.adafruit.com/products/326
+# it should work with other SSD1306-based displays.
+# The datasheet for the SSD1306 is available
+#   http://www.adafruit.com/datasheets/SSD1306.pdf
 #
 # The code is based heavily on Adafruit's Arduino library
 #   https://github.com/adafruit/Adafruit_SSD1306
 # written by Limor Fried/Ladyada for Adafruit Industries.
-#
-# The datasheet for the SSD1306 is available
-#   http://www.adafruit.com/datasheets/SSD1306.pdf
-#
-# This is the BeagleBone Black version of the library
 #
 # Some important things to know about this device and SPI:
 #
@@ -33,6 +28,15 @@
 #   keep D/C LOW for the command byte including any following argument bytes.
 #   Pull D/C HIGH only when writting to the display memory buffer.
 #   
+# SPI and GPIO calls are made through an abstraction library that calls
+# the appropriate library for the platform.
+# For the RaspberryPi:
+#     wiring2
+#     spidev
+# For the BeagleBone Black:
+#     Adafruit_BBIO.SPI 
+#     Adafruit_BBIO.GPIO
+#
 # - The pin connections between the BeagleBone Black SPI0 and OLED module are:
 #
 #      BBB    SSD1306
@@ -46,8 +50,8 @@
 #      P9_1   -> GND
 #----------------------------------------------------------------------
 
-import Adafruit_BBIO.GPIO as GPIO
-from Adafruit_BBIO.SPI import SPI
+import gaugette.gpio
+import gaugette.spi
 import time
 import font5x8
 import sys
@@ -102,15 +106,15 @@ class SSD1306:
     # We will keep d/c low and bump it high only for commands with data
     # reset is normally HIGH, and pulled LOW to reset the display
 
-    def __init__(self, bus=0, device=0, dc_pin="P9_15", reset_pin="P9_17", buffer_rows=64, buffer_cols=128, rows=32, cols=128):
+    def __init__(self, bus=0, device=0, dc_pin="P9_15", reset_pin="P9_13", buffer_rows=64, buffer_cols=128, rows=32, cols=128):
         self.cols = cols
         self.rows = rows
         self.buffer_rows = buffer_rows
         self.mem_bytes = self.buffer_rows * self.cols / 8 # total bytes in SSD1306 display ram
         self.dc_pin = dc_pin
         self.reset_pin = reset_pin
-        self.spi = SPI(bus, device)
-        self.gpio = GPIO
+        self.spi = gaugette.spi.SPI(bus, device)
+        self.gpio = gaugette.gpio.GPIO()
         self.gpio.setup(self.reset_pin, self.gpio.OUT)
         self.gpio.output(self.reset_pin, self.gpio.HIGH)
         self.gpio.setup(self.dc_pin, self.gpio.OUT)

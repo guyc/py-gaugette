@@ -1,11 +1,11 @@
 py-gaugette
 ===========
 
-A library for interfacing hardware with the Raspberry Pi.
+A library for interfacing hardware with the Raspberry Pi and BeagleBone Black.
 Supports analog gauges, capacitance switches, RGB leds and other devices.
 
-Prerequisites
-=============
+Prerequisites for the Raspberry Pi
+==================================
 
 ### WiringPi and WiringPi2-Python
 
@@ -33,6 +33,20 @@ gaugette.ssd1306 requires [spidev](https://github.com/doceme/py-spidev).
 ### gdata-python-client
 
 gaugette.oauth2 requires [Google's gdata](http://code.google.com/p/gdata-python-client/).
+
+Prerequisites for the BeagleBone Black
+======================================
+
+### Adafruit BBIO
+
+Modules that use GPIO or SPI require [Adafruit_BBIO](https://github.com/adafruit/adafruit-beaglebone-io-python/).
+
+To install:
+```
+/usr/bin/ntpdate -b -s -u pool.ntp.org
+opkg update && opkg install python-pip python-setuptools python-smbus
+pip install Adafruit_BBIO
+```
 
 SSD1306 OLED Usage
 ==================
