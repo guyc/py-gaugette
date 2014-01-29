@@ -20,9 +20,9 @@ class GPIO:
             GPIOLIB = 'Adafruit_BBIO'
         
         if (GPIOLIB == 'wiringpi2'):
-            import wiring2
+            import wiringpi2
             self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
-            self.setup = self.wiringpi2.setup
+            self.setup = self.wiringpi2_setup
             self.output = self.gpio.digitalWrite
             self.input = self.gpio.digitalRead
             self.OUT = self.gpio.OUTPUT
@@ -48,7 +48,7 @@ class GPIO:
             self.PUD_OFF = self.gpio.PUD_OFF
             
 
-    def wiringpi2_setup(channel, direction, pull_up_down=None):
+    def wiringpi2_setup(self, channel, direction, pull_up_down=None):
         self.gpio.pinMode(channel, direction)
         if pull_up_down is None: pull_up_down = self.gpio.PUD_OFF 
         self.gpio.pullUpDnControl(channel, pull_up_down)
