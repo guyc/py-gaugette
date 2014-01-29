@@ -1,9 +1,9 @@
-import Adafruit_BBIO.GPIO as GPIO
+import gaugette.gpio
 
 class CapSwitch:
     def __init__(self, pin):
         self.pin = pin
-        self.gpio = GPIO
+        self.gpio = gaugette.gpio.GPIO()
         self.gpio.setup(self.pin, self.gpio.OUT)
         self.maxCycles = 100
         self.repeats = 2
@@ -17,12 +17,12 @@ class CapSwitch:
             self.gpio.output(self.pin, self.gpio.LOW)
     
             # 2) make the pin an input without the internal pull-up on
-            self.gpio.setup(self.pin, self.gpio.INPUT, pull_up_down=self.gpio.PUD_NONE)
+            self.gpio.setup(self.pin, self.gpio.IN, pull_up_down=self.gpio.PUD_OFF)
 
             # 3) read input and see how long it takes to go high
             cycles = 0
             total = 0.0
-            while (cycles<self.maxCycles and self.gpio.digitalRead(self.pin)==0):
+            while (cycles<self.maxCycles and self.gpio.input(self.pin)==0):
                 cycles+=1;
 
             total += cycles
