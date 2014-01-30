@@ -2,6 +2,8 @@ import gaugette.ssd1306
 import time
 import sys
 
+ROWS = 32
+
 if gaugette.platform == 'raspberrypi':
   RESET_PIN = 15
   DC_PIN    = 16
@@ -10,7 +12,7 @@ else:  # beagebone
   DC_PIN    = "P9_13"
 
 print("init")
-led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=32,cols=128)
+led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=ROWS, cols=128)
 print("begin")
 led.begin()
 print("clear")
@@ -18,9 +20,9 @@ led.clear_display()
 led.display()
 
 led.invert_display()
-time.sleep(1)
+time.sleep(0.5)
 led.normal_display()
-time.sleep(1)
+time.sleep(0.5)
 
 offset = 0 # flips between 0 and 32 for double buffering
 
