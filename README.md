@@ -2,7 +2,7 @@ py-gaugette
 ===========
 
 A library for interfacing hardware with the Raspberry Pi and BeagleBone Black.
-Supports analog gauges, capacitance switches, RGB leds and other devices.
+Supports SSD1306 displays, rotary encoders, capacitance switches, RGB leds and other devices.
 
 Prerequisites for the Raspberry Pi
 ==================================
