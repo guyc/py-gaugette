@@ -10,6 +10,7 @@ import threading
 class RgbLed:
 
     def __init__(self, r_pin, g_pin, b_pin):
+        self.gpio = gaugette.gpio.GPIO()
         self.r_pin = r_pin
         self.b_pin = b_pin
         self.g_pin = g_pin
