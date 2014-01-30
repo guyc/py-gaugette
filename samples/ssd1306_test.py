@@ -2,11 +2,15 @@ import gaugette.ssd1306
 import time
 import sys
 
-RESET_PIN = "P9_15"
-DC_PIN    = "P9_13"
+if gaugette.platform == 'raspberrypi':
+  RESET_PIN = 15
+  DC_PIN    = 16
+else:  # beagebone
+  RESET_PIN = "P9_15"
+  DC_PIN    = "P9_13"
 
 print("init")
-led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=64,cols=128)
+led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=32,cols=128)
 print("begin")
 led.begin()
 print("clear")

@@ -9,17 +9,11 @@
 # On the BBB, we use Adafruit_BBIO.GPIO
 #
 #----------------------------------------------------------------------
-import imp
+import gaugette
 
 class GPIO:
     def __init__(self):
-        try:
-            imp.find_module('wiringpi2')
-            GPIOLIB = 'wiringpi2'
-        except ImportError:
-            GPIOLIB = 'Adafruit_BBIO'
-        
-        if (GPIOLIB == 'wiringpi2'):
+        if (gaugette.platform == 'raspberrypi'):
             import wiringpi2
             self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
             self.setup = self.wiringpi2_setup
@@ -33,7 +27,7 @@ class GPIO:
             self.PUD_DOWN = self.gpio.PUD_DOWN
             self.PUD_OFF = self.gpio.PUD_OFF
             
-        elif (GPIOLIB == 'Adafruit_BBIO'):
+        elif (gaugette.platform == 'beaglebone'):
             import Adafruit_BBIO.GPIO
             self.gpio = Adafruit_BBIO.GPIO
             self.setup = self.gpio.setup
@@ -46,8 +40,13 @@ class GPIO:
             self.PUD_UP = self.gpio.PUD_UP
             self.PUD_DOWN = self.gpio.PUD_DOWN
             self.PUD_OFF = self.gpio.PUD_OFF
-            
 
+        else:
+	    raise NotImplementedError("Platform '%s' is not supported." % gaugette.platform)
+
+    #----------------------------------------------------------------------
+            
+    # Implement the setup call via the wiringpi2 API
     def wiringpi2_setup(self, channel, direction, pull_up_down=None):
         self.gpio.pinMode(channel, direction)
         if pull_up_down is None: pull_up_down = self.gpio.PUD_OFF 
