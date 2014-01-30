@@ -1,9 +1,16 @@
-import wiringpi2
+import gaugette.gpio
+
+# -- need to implement PWM on beaglebone to support this class
+if gaugette.platform == 'beaglebone':
+  raise NotImplemented('rgbled is not supported on this platform')
+
+import wiringpi2 
 import threading
 
 class RgbLed:
 
     def __init__(self, r_pin, g_pin, b_pin):
+        self.gpio = gaugette.gpio.GPIO()
         self.r_pin = r_pin
         self.b_pin = b_pin
         self.g_pin = g_pin

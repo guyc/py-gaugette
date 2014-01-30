@@ -2,22 +2,16 @@
 # ssd1306.py from https://github.com/guyc/py-gaugette
 # ported by Guy Carpenter, Clearwater Software
 #
-# This library is for the Adafruit 128x32 SPI monochrome OLED 
-# based on the SSD1306 driver.
-#   http://www.adafruit.com/products/661
-#
-# This library does not directly support the larger 128x64 module,
-# but could with minor changes.
+# This library works with 
+#   Adafruit's 128x32 SPI monochrome OLED   http://www.adafruit.com/products/661
+#   Adafruit's 128x64 SPI monochrome OLED   http://www.adafruit.com/products/326
+# it should work with other SSD1306-based displays.
+# The datasheet for the SSD1306 is available
+#   http://www.adafruit.com/datasheets/SSD1306.pdf
 #
 # The code is based heavily on Adafruit's Arduino library
 #   https://github.com/adafruit/Adafruit_SSD1306
 # written by Limor Fried/Ladyada for Adafruit Industries.
-#
-# The datasheet for the SSD1306 is available
-#   http://www.adafruit.com/datasheets/SSD1306.pdf
-#
-# Wiringpi2 pinout reference
-#   https://projects.drogon.net/raspberry-pi/wiringpi2/pins/
 #
 # Some important things to know about this device and SPI:
 #
@@ -34,21 +28,30 @@
 #   keep D/C LOW for the command byte including any following argument bytes.
 #   Pull D/C HIGH only when writting to the display memory buffer.
 #   
-# - The pin connections between the Raspberry Pi and OLED module are:
+# SPI and GPIO calls are made through an abstraction library that calls
+# the appropriate library for the platform.
+# For the RaspberryPi:
+#     wiring2
+#     spidev
+# For the BeagleBone Black:
+#     Adafruit_BBIO.SPI 
+#     Adafruit_BBIO.GPIO
 #
-#      RPi     SSD1306
-#      CE0   -> CS
-#      GPIO2 -> RST   (to use a different GPIO set reset_pin to wiringpi2 pin no)
-#      GPIO1 -> D/C   (to use a different GPIO set dc_pin to wiringpi2 pin no)
-#      SCLK  -> CLK
-#      MOSI  -> DATA
-#      3.3V  -> VIN
-#            -> 3.3Vo
-#      GND   -> GND
+# - The pin connections between the BeagleBone Black SPI0 and OLED module are:
+#
+#      BBB    SSD1306
+#      P9_17  -> CS
+#      P9_15  -> RST   (arbirary GPIO, change at will)
+#      P9_13  -> D/C   (arbirary GPIO, change at will)
+#      P9_22  -> CLK
+#      P9_18  -> DATA
+#      P9_3   -> VIN
+#      N/C    -> 3.3Vo
+#      P9_1   -> GND
 #----------------------------------------------------------------------
 
-import spidev
-import wiringpi2
+import gaugette.gpio
+import gaugette.spi
 import time
 import font5x8
 import sys
@@ -103,43 +106,49 @@ class SSD1306:
     # We will keep d/c low and bump it high only for commands with data
     # reset is normally HIGH, and pulled LOW to reset the display
 
-    def __init__(self, bus=0, device=0, dc_pin=1, reset_pin=2, buffer_rows=64, buffer_cols=128, rows=32, cols=128):
+    def __init__(self, bus=0, device=0, dc_pin="P9_15", reset_pin="P9_13", buffer_rows=64, buffer_cols=128, rows=32, cols=128):
         self.cols = cols
         self.rows = rows
         self.buffer_rows = buffer_rows
         self.mem_bytes = self.buffer_rows * self.cols / 8 # total bytes in SSD1306 display ram
         self.dc_pin = dc_pin
         self.reset_pin = reset_pin
-        self.spi = spidev.SpiDev()
-        self.spi.open(bus, device)
-        self.spi.max_speed_hz = 500000
-        self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
-        self.gpio.pinMode(self.reset_pin, self.gpio.OUTPUT)
-        self.gpio.digitalWrite(self.reset_pin, self.gpio.HIGH)
-        self.gpio.pinMode(self.dc_pin, self.gpio.OUTPUT)
-        self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW)
+        self.spi = gaugette.spi.SPI(bus, device)
+        self.gpio = gaugette.gpio.GPIO()
+        self.gpio.setup(self.reset_pin, self.gpio.OUT)
+        self.gpio.output(self.reset_pin, self.gpio.HIGH)
+        self.gpio.setup(self.dc_pin, self.gpio.OUT)
+        self.gpio.output(self.dc_pin, self.gpio.LOW)
         self.font = font5x8.Font5x8
         self.col_offset = 0
         self.bitmap = self.Bitmap(buffer_cols, buffer_rows)
         self.flipped = False
 
     def reset(self):
-        self.gpio.digitalWrite(self.reset_pin, self.gpio.LOW)
-        self.gpio.delay(10) # 10ms
-        self.gpio.digitalWrite(self.reset_pin, self.gpio.HIGH)
+        self.gpio.output(self.reset_pin, self.gpio.LOW)
+        time.sleep(0.010) # 10ms
+        self.gpio.output(self.reset_pin, self.gpio.HIGH)
 
     def command(self, *bytes):
         # already low
-        # self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW) 
+        # self.gpio.output(self.dc_pin, self.gpio.LOW) 
         self.spi.writebytes(list(bytes))
 
     def data(self, bytes):
-        self.gpio.digitalWrite(self.dc_pin, self.gpio.HIGH)
-        self.spi.writebytes(bytes)
-        self.gpio.digitalWrite(self.dc_pin, self.gpio.LOW)
+        self.gpio.output(self.dc_pin, self.gpio.HIGH)
+	# chunk data to work around 255 byte limitation in adafruit implementation of writebytes
+	start = 0
+	remaining = len(bytes)
+	max_xfer = 255  # revisit - change to 1024 when Adafruit_BBIO is fixed.
+	while remaining>0:
+	    count = remaining if remaining <= max_xfer else max_xfer
+	    remaining -= count
+	    self.spi.writebytes(bytes[start:start+count])
+	    start += count
+        self.gpio.output(self.dc_pin, self.gpio.LOW)
         
     def begin(self, vcc_state = SWITCH_CAP_VCC):
-        self.gpio.delay(1) # 1ms
+        time.sleep(0.001) # 1ms
         self.reset()
         self.command(self.DISPLAY_OFF)
         self.command(self.SET_DISPLAY_CLOCK_DIV, 0x80)
