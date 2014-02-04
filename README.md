@@ -163,16 +163,16 @@ assumes the free leg of the switch is wired to GND.
 
 ```python
     # switch is wired to GND
-    gaugette.switch.Switch(SW_PIN)  # pullUp defaults to True
+    sw = gaugette.switch.Switch(SW_PIN)  # pullUp defaults to True
     # which is equivalent to...
-    gaugette.switch.Switch(SW_PIN, pullUp=True)
+    sw = gaugette.switch.Switch(SW_PIN, pullUp=True)
 ``` 
 
 If you wire to Vcc you must set the optional pullUp parameter in the constructor to False.
 
 ```python
     # switch is wired to Vcc
-    gaugette.switch.Switch(SW_PIN, pullUp=False)
+    sw = gaugette.switch.Switch(SW_PIN, pullUp=False)
 ```
 
 Regardless of the wiring polarity, the returned results are 0 for switch 
