@@ -139,6 +139,7 @@ Rotary Encoder Usage
 ```
 
 Pin numbers are Wiring pin numbers. They differ from hardware pin or GPIO ids.
+Connect your C pin of the encoder to Ground.
 
 Switch Usage
 ====================
