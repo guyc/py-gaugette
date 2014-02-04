@@ -151,6 +151,8 @@ Switch Usage
         last_state = state
 ```
 
+Depending on your hardware set up you will have to call gaugette.switch.Switch(SW_PIN, False) to set the pull up resistor properly
+
 Discussion At
 =============
 
