@@ -164,8 +164,9 @@ assumes the free leg of the switch is wired to GND.
 ```python
     # switch is wired to GND
     gaugette.switch.Switch(SW_PIN)  # pullUp defaults to True
-    gaugette.switch.Switch(SW_PIN, pullUp=True) 
-```
+    # which is equivalent to...
+    gaugette.switch.Switch(SW_PIN, pullUp=True)
+``` 
 
 If you wire to Vcc you must set the optional pullUp parameter in the constructor to False.
 
