@@ -157,7 +157,26 @@ Switch Usage
 ```
 
 Pin numbers are Wiring pin numbers. They differ from hardware pin or GPIO ids.
-Depending on your hardware set up you will have to call gaugette.switch.Switch(SW_PIN, False) to set the pull up resistor properly.
+
+You can wire you switch to either GND or Vcc.  By default this class
+assumes the free leg of the switch is wired to GND.  
+
+```python
+    # switch is wired to GND
+    gaugette.switch.Switch(SW_PIN)  # pullUp defaults to True
+    gaugette.switch.Switch(SW_PIN, pullUp=True) 
+```
+
+If you wire to Vcc you must set the optional pullUp parameter in the constructor to False.
+
+```python
+    # switch is wired to Vcc
+    gaugette.switch.Switch(SW_PIN, pullUp=False)
+```
+
+Regardless of the wiring polarity, the returned results are 0 for switch 
+open, 1 for switch closed.
+
 
 Discussion At
 =============
