@@ -131,7 +131,7 @@ Rotary Encoder Usage
     B_PIN = 9
     encoder = gaugette.rotary_encoder.RotaryEncoder(A_PIN, B_PIN)
     while True:
-      delta = encoder.delta()
+      delta = encoder.get_delta()
       if delta!=0:
         print "rotate %d" % delta
 ```
