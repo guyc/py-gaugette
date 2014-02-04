@@ -136,15 +136,16 @@ class SSD1306:
 
     def data(self, bytes):
         self.gpio.output(self.dc_pin, self.gpio.HIGH)
-	# chunk data to work around 255 byte limitation in adafruit implementation of writebytes
-	start = 0
-	remaining = len(bytes)
-	max_xfer = 255  # revisit - change to 1024 when Adafruit_BBIO is fixed.
-	while remaining>0:
-	    count = remaining if remaining <= max_xfer else max_xfer
-	    remaining -= count
-	    self.spi.writebytes(bytes[start:start+count])
-	    start += count
+        #  chunk data to work around 255 byte limitation in adafruit implementation of writebytes
+        # revisit - change to 1024 when Adafruit_BBIO is fixed.
+        max_xfer = 255 if gaugette.platform == 'beaglebone' else 1024
+        start = 0
+        remaining = len(bytes)
+        while remaining>0:
+            count = remaining if remaining <= max_xfer else max_xfer
+            remaining -= count
+            self.spi.writebytes(bytes[start:start+count])
+            start += count
         self.gpio.output(self.dc_pin, self.gpio.LOW)
         
     def begin(self, vcc_state = SWITCH_CAP_VCC):
