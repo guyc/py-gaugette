@@ -122,6 +122,8 @@ Rgb Led Usage
     led.fade(100,0,0)
 ```
 
+Pin numbers are Wiring pin numbers. They differ from hardware pin or GPIO ids.
+
 Rotary Encoder Usage
 ====================
 
@@ -131,10 +133,13 @@ Rotary Encoder Usage
     B_PIN = 9
     encoder = gaugette.rotary_encoder.RotaryEncoder(A_PIN, B_PIN)
     while True:
-      delta = encoder.delta()
+      delta = encoder.get_delta()
       if delta!=0:
         print "rotate %d" % delta
 ```
+
+Pin numbers are Wiring pin numbers. They differ from hardware pin or GPIO ids.
+Connect your C pin of the encoder to Ground.
 
 Switch Usage
 ====================
@@ -150,6 +155,9 @@ Switch Usage
         print "switch %d" % state
         last_state = state
 ```
+
+Pin numbers are Wiring pin numbers. They differ from hardware pin or GPIO ids.
+Depending on your hardware set up you will have to call gaugette.switch.Switch(SW_PIN, False) to set the pull up resistor properly.
 
 Discussion At
 =============
