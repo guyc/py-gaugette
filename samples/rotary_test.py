@@ -24,7 +24,7 @@ else: # beaglbone
     A_PIN  = "P9_13"
     B_PIN  = "P9_14"
     SW_PIN = "P9_15"
-	
+
 encoder = gaugette.rotary_encoder.RotaryEncoder(A_PIN, B_PIN)
 switch = gaugette.switch.Switch(SW_PIN)
 

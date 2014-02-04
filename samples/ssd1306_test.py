@@ -31,15 +31,15 @@ while True:
     # write the current time to the display on every other cycle
     if offset == 0:
         text = time.strftime("%A")
-	print("draw")
+        print("draw")
         led.draw_text2(0,0,text,2)
         text = time.strftime("%e %b %Y")
-	print("draw")
+        print("draw")
         led.draw_text2(0,16,text,2)
         text = time.strftime("%X")
-	print("draw")
+        print("draw")
         led.draw_text2(0,32+4,text,3)
-	print("display")
+        print("display")
         led.display()
         time.sleep(0.2)
     else:

@@ -42,7 +42,7 @@ class GPIO:
             self.PUD_OFF = self.gpio.PUD_OFF
 
         else:
-	    raise NotImplementedError("Platform '%s' is not supported." % gaugette.platform)
+            raise NotImplementedError("Platform '%s' is not supported." % gaugette.platform)
 
     #----------------------------------------------------------------------
             
