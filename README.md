@@ -158,8 +158,8 @@ Switch Usage
 
 Pin numbers are Wiring pin numbers. They differ from hardware pin or GPIO ids.
 
-You can wire you switch to either GND or Vcc.  By default this class
-assumes the free leg of the switch is wired to GND.  
+You can wire the switch to either GND or Vcc.  By default this class
+assumes the free leg of the switch is wired to GND.
 
 ```python
     # switch is wired to GND
