@@ -22,7 +22,7 @@ led_on = True
 
 while 1:
     if switch.sense():
-        print 'sense'
+        print('sense')
 
         if led_on:
             led.fade(100,0,0)

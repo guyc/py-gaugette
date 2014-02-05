@@ -52,8 +52,8 @@
 
 import gaugette.gpio
 import gaugette.spi
+import gaugette.font5x8
 import time
-import font5x8
 import sys
 
 class SSD1306:
@@ -119,7 +119,7 @@ class SSD1306:
         self.gpio.output(self.reset_pin, self.gpio.HIGH)
         self.gpio.setup(self.dc_pin, self.gpio.OUT)
         self.gpio.output(self.dc_pin, self.gpio.LOW)
-        self.font = font5x8.Font5x8
+        self.font = gaugette.font5x8.Font5x8
         self.col_offset = 0
         self.bitmap = self.Bitmap(buffer_cols, buffer_rows)
         self.flipped = False
