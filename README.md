@@ -4,6 +4,28 @@ py-gaugette
 A library for interfacing hardware with the Raspberry Pi and BeagleBone Black.
 Supports SSD1306 displays, rotary encoders, capacitance switches, RGB leds and other devices.
 
+Limited Support for Python 3
+============================
+
+This library has been developed using Python v2.7.  I try to keep my code
+compatible with Python 3 and periodically test that.  However as of Feb 2014 some
+required libraries are not yet available for Python 3.
+ - py-spidev for the Raspberry Pi is not available for Python 3
+ - Adafruit_BBIO for the BeagleBone is not available for Python 3
+
+Because of these limitations Python 3 support is effectly only for the Raspberry Pi,
+and excludes the SSD1306 class which needs SPI.
+
+For the Raspberry Pi
+
+| Class                        | RPi + Python 2.7 | RPi + Python 3   | BBB + Python 2.7 | BBB + Python 3   |
+|:-----------------------------|:----------------:|:----------------:|:----------------:|:----------------:|
+| capswitch.CapSwitch          | yes              | yes              | yes              | no               |
+| rgbled.RgbLed                | yes              | yes              | yes              | no               |
+| rotary_encoder.RotaryEncoder | yes              | yes              | yes              | no               |
+| ssd1306.SSD1306              | yes              | yes              | yes              | no               |
+| switch.Switch                | yes              | yes              | yes              | no               |
+
 Prerequisites for the Raspberry Pi
 ==================================
 
