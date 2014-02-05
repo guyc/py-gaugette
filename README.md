@@ -23,7 +23,7 @@ For the Raspberry Pi
 | CapSwitch     | yes              | yes              | yes              | no               |
 | RgbLed        | yes              | yes              | no               | no               |
 | RotaryEncoder | yes              | yes              | yes              | no               |
-| SSD1306       | yes              | yes              | yes              | no               |
+| SSD1306       | yes              | no               | yes              | no               |
 | Switch        | yes              | yes              | yes              | no               |
 
 Prerequisites for the Raspberry Pi
