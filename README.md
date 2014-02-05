@@ -18,13 +18,13 @@ and excludes the SSD1306 class which needs SPI.
 
 For the Raspberry Pi
 
-| Class                        | RPi + Python 2.7 | RPi + Python 3   | BBB + Python 2.7 | BBB + Python 3   |
-|:-----------------------------|:----------------:|:----------------:|:----------------:|:----------------:|
-| capswitch.CapSwitch          | yes              | yes              | yes              | no               |
-| rgbled.RgbLed                | yes              | yes              | yes              | no               |
-| rotary_encoder.RotaryEncoder | yes              | yes              | yes              | no               |
-| ssd1306.SSD1306              | yes              | yes              | yes              | no               |
-| switch.Switch                | yes              | yes              | yes              | no               |
+| Class         | RPi + Python 2.7 | RPi + Python 3   | BBB + Python 2.7 | BBB + Python 3   |
+|:--------------|:----------------:|:----------------:|:----------------:|:----------------:|
+| CapSwitch     | yes              | yes              | yes              | no               |
+| RgbLed        | yes              | yes              | no               | no               |
+| RotaryEncoder | yes              | yes              | yes              | no               |
+| SSD1306       | yes              | yes              | yes              | no               |
+| Switch        | yes              | yes              | yes              | no               |
 
 Prerequisites for the Raspberry Pi
 ==================================
