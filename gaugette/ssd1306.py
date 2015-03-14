@@ -50,6 +50,7 @@
 #      P9_1   -> GND
 #----------------------------------------------------------------------
 
+import gaugette.platform
 import gaugette.gpio
 import gaugette.spi
 import gaugette.font5x8
@@ -138,7 +139,7 @@ class SSD1306:
         self.gpio.output(self.dc_pin, self.gpio.HIGH)
         #  chunk data to work around 255 byte limitation in adafruit implementation of writebytes
         # revisit - change to 1024 when Adafruit_BBIO is fixed.
-        max_xfer = 255 if gaugette.platform == 'beaglebone' else 1024
+        max_xfer = 255 if gaugette.platform.isBeagleBoneBlack else 1024
         start = 0
         remaining = len(bytes)
         while remaining>0:

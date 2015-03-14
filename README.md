@@ -43,6 +43,7 @@ sudo ./build
 
 To install wiringpi2-python:
 ```
+sudo apt-get install python-setuptools python-dev
 git clone https://github.com/Gadgetoid/WiringPi2-Python.git
 cd WiringPi2-Python/
 sudo python setup.py install
@@ -56,6 +57,13 @@ gaugette.ssd1306 requires [spidev](https://github.com/doceme/py-spidev).
 ### gdata-python-client
 
 gaugette.oauth2 requires [Google's gdata](http://code.google.com/p/gdata-python-client/).
+
+Download the current version and install as follows:
+``` 
+tar -zxf gdata-2.0.18.tar.gz
+cd gdata-2.0.18
+sudo python setup.py install
+```
 
 Prerequisites for the BeagleBone Black
 ======================================

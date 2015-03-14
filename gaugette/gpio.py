@@ -9,11 +9,11 @@
 # On the BBB, we use Adafruit_BBIO.GPIO
 #
 #----------------------------------------------------------------------
-import gaugette
+import gaugette.platform
 
 class GPIO:
     def __init__(self):
-        if (gaugette.platform == 'raspberrypi'):
+        if gaugette.platform.isRaspberryPi:
             import wiringpi2
             self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
             self.setup = self.wiringpi2_setup
@@ -27,7 +27,7 @@ class GPIO:
             self.PUD_DOWN = self.gpio.PUD_DOWN
             self.PUD_OFF = self.gpio.PUD_OFF
             
-        elif (gaugette.platform == 'beaglebone'):
+        elif gaugette.platform.isBeagleBoneBlack:
             import Adafruit_BBIO.GPIO
             self.gpio = Adafruit_BBIO.GPIO
             self.setup = self.gpio.setup
@@ -42,7 +42,7 @@ class GPIO:
             self.PUD_OFF = self.gpio.PUD_OFF
 
         else:
-            raise NotImplementedError("Platform '%s' is not supported." % gaugette.platform)
+            raise NotImplementedError("Platform is not supported.")
 
     #----------------------------------------------------------------------
             

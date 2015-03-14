@@ -1,7 +1,8 @@
 import gaugette.gpio
+import gaugette.platform
 
 # -- need to implement PWM on beaglebone to support this class
-if gaugette.platform == 'beaglebone':
+if not gaugette.platform.isRaspberryPi:
   raise NotImplemented('rgbled is not supported on this platform')
 
 import wiringpi2 
