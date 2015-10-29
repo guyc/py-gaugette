@@ -119,19 +119,23 @@ class RotaryEncoder:
         def __init__(self, a_pin, b_pin):
             threading.Thread.__init__(self)
             self.lock = threading.Lock()
+            self.stopping = False
             self.encoder = RotaryEncoder(a_pin, b_pin)
             self.daemon = True
             self.delta = 0
+            self.delay = 0.001
 
         def run(self):
-            while True:
+            while not self.stopping:
                 delta = self.encoder.get_delta()
                 with self.lock:
                     self.delta += delta
-                time.sleep(0.001)
+                time.sleep(self.delay)
+
+        def stop(self):
+            self.stopping = True
 
         def get_delta(self):
-            # revisit - should use locking
             with self.lock:
                 delta = self.delta
                 self.delta = 0
