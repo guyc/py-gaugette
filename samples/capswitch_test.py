@@ -1,3 +1,4 @@
+import gaugette.platform
 import gaugette.capswitch
 import gaugette.rgbled
 

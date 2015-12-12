@@ -12,6 +12,7 @@
 #    1 1   3    2    1    0
 #    0 1   2    3    1    0
 
+import gaugette.platform
 import gaugette.rotary_encoder
 import gaugette.switch
 import math

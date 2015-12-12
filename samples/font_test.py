@@ -1,4 +1,5 @@
 import gaugette.ssd1306
+import gaugette.platform
 import time
 
 ROWS = 32  # set to 64 for 128x64 display
