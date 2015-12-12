@@ -16,7 +16,7 @@ import gaugette.rotary_encoder
 import gaugette.switch
 import math
 
-if gaugette.platformisRaspberryPi:
+if gaugette.platform.isRaspberryPi:
     A_PIN  = 7
     B_PIN  = 9
     SW_PIN = 8
