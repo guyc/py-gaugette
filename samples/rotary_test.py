@@ -12,11 +12,12 @@
 #    1 1   3    2    1    0
 #    0 1   2    3    1    0
 
+import gaugette.platform
 import gaugette.rotary_encoder
 import gaugette.switch
 import math
 
-if gaugette.platform == 'raspberrypi':
+if gaugette.platform.isRaspberryPi:
     A_PIN  = 7
     B_PIN  = 9
     SW_PIN = 8

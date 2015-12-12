@@ -23,4 +23,3 @@ while True:
     if sw_state != last_state:
         print ("switch %d" % sw_state)
         last_state = sw_state
-        
