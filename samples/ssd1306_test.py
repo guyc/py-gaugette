@@ -1,15 +1,14 @@
 import gaugette.ssd1306
 import time
-import sys
 
 ROWS = 32
 
-if gaugette.platform == 'raspberrypi':
-  RESET_PIN = 15
-  DC_PIN    = 16
+if gaugette.platform.isRaspberryPi:
+    RESET_PIN = 15
+    DC_PIN    = 16
 else:  # beagebone
-  RESET_PIN = "P9_15"
-  DC_PIN    = "P9_13"
+    RESET_PIN = "P9_15"
+    DC_PIN    = "P9_13"
 
 print("init")
 led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=ROWS, cols=128)
@@ -44,7 +43,7 @@ while True:
         time.sleep(0.2)
     else:
         time.sleep(0.5)
-        
+
     # vertically scroll to switch between buffers
     print("scroll")
     for i in range(0,32):
