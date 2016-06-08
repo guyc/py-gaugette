@@ -30,9 +30,9 @@ Here's the current compatibility matrix:
 Prerequisites for the Raspberry Pi
 ==================================
 
-### WiringPi and WiringPi2-Python
+### WiringPi and WiringPi-Python
 
-Modules that use GPIO require [wiringpi](https://projects.drogon.net/raspberry-pi/wiringpi/) and [WiringPi2-Python](https://github.com/WiringPi/WiringPi2-Python).
+Modules that use GPIO require [wiringpi](https://projects.drogon.net/raspberry-pi/wiringpi/) and [WiringPi-Python](https://github.com/WiringPi/WiringPi-Python).
 
 To install wiringpi:
 ```
@@ -41,14 +41,7 @@ cd wiringPi
 sudo ./build
 ```
 
-To install wiringpi2-python:
-```
-sudo apt-get install python-setuptools python-dev
-git clone https://github.com/Gadgetoid/WiringPi2-Python.git
-cd WiringPi2-Python/
-sudo python setup.py install
-cd ..
-```
+To install wiringpi-python, please refer to their README: <https://github.com/WiringPi/WiringPi-Python>
 
 ### py-spidev
 
