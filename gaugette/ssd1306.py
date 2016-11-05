@@ -111,7 +111,7 @@ class SSD1306:
         self.cols = cols
         self.rows = rows
         self.buffer_rows = buffer_rows
-        self.mem_bytes = self.buffer_rows * self.cols / 8 # total bytes in SSD1306 display ram
+        self.mem_bytes = self.buffer_rows * self.cols >> 3 # total bytes in SSD1306 display ram
         self.dc_pin = dc_pin
         self.reset_pin = reset_pin
         self.gpio.setup(self.reset_pin, self.gpio.OUT)

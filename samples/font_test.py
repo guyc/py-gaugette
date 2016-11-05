@@ -1,5 +1,7 @@
 import gaugette.ssd1306
 import gaugette.platform
+import gaugette.gpio
+import gaugette.spi
 import time
 
 ROWS = 32  # set to 64 for 128x64 display
@@ -57,7 +59,9 @@ from gaugette.fonts import curlz_32
 fonts += [curlz_22,
           curlz_32]
 
-led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=ROWS, cols=128, buffer_cols=256)
+gpio = gaugette.gpio.GPIO()
+spi = gaugette.spi.SPI(bus=0, device=0)
+led = gaugette.ssd1306.SSD1306(gpio, spi, reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=ROWS, cols=128, buffer_cols=256)
 led.begin()
 led.clear_display()
 
@@ -65,7 +69,7 @@ offset = 0
 while True:
     for font in fonts:
         row = (offset+32) % 64
-        y = (32-font.char_height)/2
+        y = (32-font.char_height) // 2
         led.clear_block(0,row,256,32)
         textSize = led.draw_text3(0,row+y,font.name,font)
         if textSize > 256:
