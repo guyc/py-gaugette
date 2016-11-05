@@ -1,11 +1,11 @@
-import wiringpi2
+import wiringpi
 
 class Switch:
 
     def __init__(self, pin, pullUp=True):
         self.pin = pin
         self.pullUp = pullUp
-        self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
+        self.gpio = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
         self.gpio.pinMode(self.pin, self.gpio.INPUT)
         if self.pullUp:
             self.gpio.pullUpDnControl(self.pin, self.gpio.PUD_UP)

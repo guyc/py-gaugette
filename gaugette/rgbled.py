@@ -5,7 +5,7 @@ import gaugette.platform
 if not gaugette.platform.isRaspberryPi:
   raise NotImplemented('rgbled is not supported on this platform')
 
-import wiringpi2 
+import wiringpi
 import threading
 
 class RgbLed:
@@ -15,9 +15,9 @@ class RgbLed:
         self.r_pin = r_pin
         self.b_pin = b_pin
         self.g_pin = g_pin
-        self.r_pwm = wiringpi2.softPwmCreate(r_pin, 0, 100)
-        self.g_pwm = wiringpi2.softPwmCreate(g_pin, 0, 100)
-        self.b_pwm = wiringpi2.softPwmCreate(b_pin, 0, 100)
+        self.r_pwm = wiringpi.softPwmCreate(r_pin, 0, 100)
+        self.g_pwm = wiringpi.softPwmCreate(g_pin, 0, 100)
+        self.b_pwm = wiringpi.softPwmCreate(b_pin, 0, 100)
         self.red = 0
         self.green = 0
         self.blue = 0
@@ -27,20 +27,20 @@ class RgbLed:
         self.red = red
         self.green = green
         self.blue = blue
-        wiringpi2.softPwmWrite(self.r_pin, red)
-        wiringpi2.softPwmWrite(self.g_pin, green)
-        wiringpi2.softPwmWrite(self.b_pin, blue)
+        wiringpi.softPwmWrite(self.r_pin, red)
+        wiringpi.softPwmWrite(self.g_pin, green)
+        wiringpi.softPwmWrite(self.b_pin, blue)
 
     def fade(self, red, green, blue, delay=500, step=5):
         for i in range(0, delay, step):
             f = (0.0+i)/delay
             r = self.red   + (red  -self.red)   * f
-            wiringpi2.softPwmWrite(self.r_pin, int(r))
+            wiringpi.softPwmWrite(self.r_pin, int(r))
             g = self.green + (green-self.green) * f
-            wiringpi2.softPwmWrite(self.g_pin, int(g))
+            wiringpi.softPwmWrite(self.g_pin, int(g))
             b = self.blue  + (blue -self.blue)  * f
-            wiringpi2.softPwmWrite(self.b_pin, int(b))
-            wiringpi2.delay(step)
+            wiringpi.softPwmWrite(self.b_pin, int(b))
+            wiringpi.delay(step)
         self.red = red
         self.blue = blue
         self.green = green
