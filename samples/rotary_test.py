@@ -20,8 +20,8 @@ import math
 
 if gaugette.platform.isRaspberryPi:
     A_PIN  = 7
-    B_PIN  = 9
-    SW_PIN = 8
+    B_PIN  = 8
+    SW_PIN = 9
 else: # beaglbone
     A_PIN  = "P9_13"
     B_PIN  = "P9_14"
