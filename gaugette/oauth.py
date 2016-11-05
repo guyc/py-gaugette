@@ -78,10 +78,7 @@ class DeviceOAuth:
             {"Content-type": "application/x-www-form-urlencoded"}
             )
 
-        print(response)
-        print(content)
         content_utf8 = content.decode('utf-8')
-        print(content_utf8)
 
         if (response.status == 200):
             data = json.loads(content_utf8)
@@ -115,10 +112,7 @@ class DeviceOAuth:
                 {"Content-type": "application/x-www-form-urlencoded"}
                 )
 
-            print(response)
-            print(content)
             content_utf8 = content.decode('utf-8')
-            print(content_utf8)
 
             if (response.status == 200):
                 data = json.loads(content_utf8)
@@ -147,7 +141,6 @@ class DeviceOAuth:
         response = self.conn.getresponse()
         if (response.status == 200):
             data = json.loads(response.read())
-            print(data)
             if 'access_token' in data:
                 self.token = data
                 # we NEVER get a new refresh token at this point

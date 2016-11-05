@@ -1,4 +1,5 @@
 import gaugette.platform
+import gaugette.gpio
 import gaugette.capswitch
 import gaugette.rgbled
 
@@ -14,7 +15,8 @@ else:  # beaglebone
     RGB_BLUE   = 'P9_X'
     raise NotImplementedError('capswitch is not yet supported on the beaglebone')
 
-switch = gaugette.capswitch.CapSwitch(SWITCH_PIN)
+gpio = gaugette.gpio.GPIO()
+switch = gaugette.capswitch.CapSwitch(gpio, SWITCH_PIN)
 led = gaugette.rgbled.RgbLed(RGB_RED, RGB_GREEN, RGB_BLUE)
 
 led.set(0,0,100)

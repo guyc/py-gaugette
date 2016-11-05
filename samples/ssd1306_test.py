@@ -1,5 +1,6 @@
 import gaugette.ssd1306
 import gaugette.platform
+import gaugette.gpio
 import time
 
 ROWS = 32
@@ -11,8 +12,13 @@ else:  # beagebone
     RESET_PIN = "P9_15"
     DC_PIN    = "P9_13"
 
+
+spi_bus = 0
+spi_device = 0
+gpio = gaugette.gpio.GPIO()
+spi = gaugette.spi.SPI(spi_bus, spi_device)
 print("init")
-led = gaugette.ssd1306.SSD1306(reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=ROWS, cols=128)
+led = gaugette.ssd1306.SSD1306(gpio, spi, reset_pin=RESET_PIN, dc_pin=DC_PIN, rows=ROWS, cols=128)
 print("begin")
 led.begin()
 print("clear")

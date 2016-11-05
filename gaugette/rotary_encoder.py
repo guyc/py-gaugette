@@ -11,7 +11,7 @@
 # This library expects the common pin C to be connected
 # to ground.  Pins A and B will have their pull-up resistor
 # pulled high.
-# 
+#
 # Usage:
 #
 #     import gaugette.rotary_encoder
@@ -34,11 +34,10 @@ class RotaryEncoder:
     # Pass the wiring pin numbers here.  See:
     #  https://projects.drogon.net/raspberry-pi/wiringpi2/pins/
     #----------------------------------------------------------------------
-    def __init__(self, a_pin, b_pin):
+    def __init__(self, gpio, a_pin, b_pin):
+        self.gpio = gpio
         self.a_pin = a_pin
         self.b_pin = b_pin
-
-        self.gpio = gaugette.gpio.GPIO()
 
         self.gpio.setup(self.a_pin, self.gpio.IN, self.gpio.PUD_UP)
         self.gpio.setup(self.b_pin, self.gpio.IN, self.gpio.PUD_UP)
@@ -64,17 +63,17 @@ class RotaryEncoder:
 
     # Returns the quadrature encoder state converted into
     # a numerical sequence 0,1,2,3,0,1,2,3...
-    #    
+    #
     # Turning the encoder clockwise generates these
     # values for switches B and A:
     #  B A
     #  0 0
     #  0 1
     #  1 1
-    #  1 0 
+    #  1 0
     # We convert these to an ordinal sequence number by returning
     #   seq = (A ^ B) | B << 2
-    # 
+    #
     def rotation_sequence(self):
         a_state = self.gpio.input(self.a_pin)
         b_state = self.gpio.input(self.b_pin)
@@ -91,7 +90,7 @@ class RotaryEncoder:
                 delta = -1
             elif delta==2:
                 delta = int(math.copysign(delta, self.last_delta))  # same direction as previous, 2 steps
-                
+
             self.last_delta = delta
             self.r_seq = r_seq
 
@@ -108,19 +107,19 @@ class RotaryEncoder:
         #   -1 // 2 = -1 (not 0)
         #   -1 % 2 =  1 (not -1)
         # // is integer division operator.  Note the behaviour of the / operator
-        # when used on integers changed between python 2 and 3. 
+        # when used on integers changed between python 2 and 3.
         # See http://www.python.org/dev/peps/pep-0238/
-        self.remainder += self.get_delta() 
+        self.remainder += self.get_delta()
         cycles = self.remainder // self.steps_per_cycle
         self.remainder %= self.steps_per_cycle # remainder always remains positive
         return cycles
 
     class Worker(threading.Thread):
-        def __init__(self, a_pin, b_pin):
+        def __init__(self, gpio, a_pin, b_pin):
             threading.Thread.__init__(self)
             self.lock = threading.Lock()
             self.stopping = False
-            self.encoder = RotaryEncoder(a_pin, b_pin)
+            self.encoder = RotaryEncoder(gpio, a_pin, b_pin)
             self.daemon = True
             self.delta = 0
             self.delay = 0.001

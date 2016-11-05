@@ -1,19 +1,16 @@
-import wiringpi2
+import wiringpi
 
 class Switch:
 
-    def __init__(self, pin, pullUp=True):
+    def __init__(self, gpio, pin, pullUp=True):
+        self.gpio = gpio
         self.pin = pin
         self.pullUp = pullUp
-        self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
-        self.gpio.pinMode(self.pin, self.gpio.INPUT)
-        if self.pullUp:
-            self.gpio.pullUpDnControl(self.pin, self.gpio.PUD_UP)
-        else:
-            self.gpio.pullUpDnControl(self.pin, self.gpio.PUD_DOWN)
+        pullUpMode = gpio.PUD_UP if pullUp else gpio.PUD_DOWN
+        self.gpio.setup(self.pin, self.gpio.IN, pullUpMode)
 
     def get_state(self):
-        state = self.gpio.digitalRead(self.pin)
+        state = self.gpio.input(self.pin)
         if self.pullUp:
             # If we are pulling up and switching
             # to ground, state will be 1 when the switch is open, and 0

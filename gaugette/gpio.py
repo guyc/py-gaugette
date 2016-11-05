@@ -2,10 +2,10 @@
 # Gaugette.GPIO from from https://github.com/guyc/py-gaugette
 # Guy Carpenter, Clearwater Software
 #
-# This is an abstraction layer for GPIO calls to isolate the 
+# This is an abstraction layer for GPIO calls to isolate the
 # differences between the RasperryPi and BeagleBone Black implementations.
 #
-# On the RPi, we use wiringpi2.GPIO
+# On the RPi, we use wiringpi.GPIO
 # On the BBB, we use Adafruit_BBIO.GPIO
 #
 #----------------------------------------------------------------------
@@ -14,9 +14,9 @@ import gaugette.platform
 class GPIO:
     def __init__(self):
         if gaugette.platform.isRaspberryPi:
-            import wiringpi2
-            self.gpio = wiringpi2.GPIO(wiringpi2.GPIO.WPI_MODE_PINS)
-            self.setup = self.wiringpi2_setup
+            import wiringpi
+            self.gpio = wiringpi.GPIO(wiringpi.GPIO.WPI_MODE_PINS)
+            self.setup = self.wiringpi_setup
             self.output = self.gpio.digitalWrite
             self.input = self.gpio.digitalRead
             self.OUT = self.gpio.OUTPUT
@@ -26,7 +26,7 @@ class GPIO:
             self.PUD_UP = self.gpio.PUD_UP
             self.PUD_DOWN = self.gpio.PUD_DOWN
             self.PUD_OFF = self.gpio.PUD_OFF
-            
+
         elif gaugette.platform.isBeagleBoneBlack:
             import Adafruit_BBIO.GPIO
             self.gpio = Adafruit_BBIO.GPIO
@@ -45,9 +45,9 @@ class GPIO:
             raise NotImplementedError("Platform is not supported.")
 
     #----------------------------------------------------------------------
-            
-    # Implement the setup call via the wiringpi2 API
-    def wiringpi2_setup(self, channel, direction, pull_up_down=None):
+        
+    # Implement the setup call via the wiringpi API
+    def wiringpi_setup(self, channel, direction, pull_up_down=None):
         self.gpio.pinMode(channel, direction)
-        if pull_up_down is None: pull_up_down = self.gpio.PUD_OFF 
+        if pull_up_down is None: pull_up_down = self.gpio.PUD_OFF
         self.gpio.pullUpDnControl(channel, pull_up_down)
