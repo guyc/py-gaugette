@@ -1,7 +1,6 @@
 # https://developers.google.com/accounts/docs/OAuth2ForDevices
 
 import sys
-from pprint import pprint
 import urllib
 import httplib2
 import os.path
@@ -18,7 +17,9 @@ class DeviceOAuth:
         self.token = None
         self.retry_interval = 10 # will be set by get_user_code
         self.device_code = None
-        self.verfication_url = None
+        self.verification_url = None
+        self.user_code = None
+        self.conn = None
         self.token_file = 'oauth_token.json'
         self.scope = [
             'https://www.googleapis.com/auth/spreadsheets',
@@ -56,13 +57,13 @@ class DeviceOAuth:
     def load_token(self):
         self.token = None
         if os.path.isfile(self.token_file):
-            with open(self.token_file) as f:
-                self.token = json.load(f)
+            with open(self.token_file) as file:
+                self.token = json.load(file)
         return self.token
 
     def save_token(self):
-        with open(self.token_file, 'w') as f:
-            f.write(json.dumps(self.token))
+        with open(self.token_file, 'w') as file:
+            file.write(json.dumps(self.token))
 
     def has_token(self):
         return self.token != None
@@ -80,7 +81,7 @@ class DeviceOAuth:
 
         content_utf8 = content.decode('utf-8')
 
-        if (response.status == 200):
+        if response.status == 200:
             data = json.loads(content_utf8)
             self.device_code = data['device_code']
             self.user_code = data['user_code']
@@ -93,7 +94,7 @@ class DeviceOAuth:
         return self.user_code
 
     def set_token_expiry(self):
-        expires_in = timedelta(seconds = self.token['expires_in'])
+        expires_in = timedelta(seconds=self.token['expires_in'])
         expires_at = datetime.now() + expires_in
         self.token['expires_at'] = expires_at.isoformat()
 
@@ -114,7 +115,7 @@ class DeviceOAuth:
 
             content_utf8 = content.decode('utf-8')
 
-            if (response.status == 200):
+            if response.status == 200:
                 data = json.loads(content_utf8)
                 if 'access_token' in data:
                     self.token = data
@@ -139,7 +140,7 @@ class DeviceOAuth:
             )
 
         response = self.conn.getresponse()
-        if (response.status == 200):
+        if response.status == 200:
             data = json.loads(response.read())
             if 'access_token' in data:
                 self.token = data

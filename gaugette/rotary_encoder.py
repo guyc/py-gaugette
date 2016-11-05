@@ -24,7 +24,6 @@
 #       if delta!=0:
 #         print delta
 
-import gaugette.gpio
 import math
 import threading
 import time
@@ -47,12 +46,13 @@ class RotaryEncoder:
         self.last_delta = 0
         self.r_seq = self.rotation_sequence()
 
-        # steps_per_cycle is only used in get_cycles which
+        # steps_per_cycle and self.remainder are only used in get_cycles which
         # returns a coarse-granularity step count.  By default
         # steps_per_cycle is 4 as there are 4 steps per
         # detent on my encoder, and get_cycles() will return a signed
         # count of full detent steps.
         self.steps_per_cycle = 4
+        self.remainder = 0
 
     # Gets the 2-bit rotation state of the current position
     # This is deprecated - we now use rotation_sequence instead.
@@ -86,9 +86,9 @@ class RotaryEncoder:
         r_seq = self.rotation_sequence()
         if r_seq != self.r_seq:
             delta = (r_seq - self.r_seq) % 4
-            if delta==3:
+            if delta == 3:
                 delta = -1
-            elif delta==2:
+            elif delta == 2:
                 delta = int(math.copysign(delta, self.last_delta))  # same direction as previous, 2 steps
 
             self.last_delta = delta

@@ -38,7 +38,7 @@ class GPIO:
             self.output = self.gpio.output
             self.input = self.gpio.input
             self.OUT = self.gpio.OUT
-            self.IN  = self.gpio.IN
+            self.IN = self.gpio.IN
             self.HIGH = self.gpio.HIGH
             self.LOW = self.gpio.LOW
             self.PUD_UP = self.gpio.PUD_UP
@@ -49,9 +49,10 @@ class GPIO:
             raise NotImplementedError("Platform is not supported.")
 
     #----------------------------------------------------------------------
-        
+
     # Implement the setup call via the wiringpi API
     def wiringpi_setup(self, channel, direction, pull_up_down=None):
         self.gpio.pinMode(channel, direction)
-        if pull_up_down is None: pull_up_down = self.gpio.PUD_OFF
+        if pull_up_down is None:
+            pull_up_down = self.gpio.PUD_OFF
         self.gpio.pullUpDnControl(channel, pull_up_down)
