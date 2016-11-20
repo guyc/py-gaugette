@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 class DeviceOAuth:
 
-    def __init__(self, client_id, client_secret):
+    def __init__(self, client_id, client_secret, scopes):
         self.client_id = client_id
         self.client_secret = client_secret
         self.token = None
@@ -21,11 +21,7 @@ class DeviceOAuth:
         self.user_code = None
         self.conn = None
         self.token_file = 'oauth_token.json'
-        self.scope = [
-            'https://www.googleapis.com/auth/spreadsheets',
-            'https://spreadsheets.google.com/feeds', #  scope information for the Google Spreadsheets API
-            'https://docs.google.com/feeds',         # if an application needs to create spreadsheets, or otherwise manipulate their metadata,
-        ]
+        self.scope = scopes
         self.reset_connection()
 
 
