@@ -1,46 +1,47 @@
-import gaugette.oauth
+from gaugette.oauth import DeviceOAuth
+from apiclient import discovery
 import datetime
-import gdata.service
+import httplib2
+import base64
+import json
 
-CLIENT_ID       = 'your client_id here'
-CLIENT_SECRET   = 'your client secret here'
-SPREADSHEET_KEY = 'your spreadsheet key here'
+# Beyond testing, generate your own client_id and secret
+client_id       = '911969952744.apps.googleusercontent.com'
+client_secret   = 'fj7nrIP3AeYDFQDbewnWrmfM'
+# only pass the scope or scopes you require.
+scopes          = ['profile', 'email', 'https://www.googleapis.com/auth/calendar.readonly']
 
-oauth = gaugette.oauth.OAuth(CLIENT_ID, CLIENT_SECRET)
-if not oauth.has_token():
-    user_code = oauth.get_user_code()
-    print "Go to %s and enter the code %s" % (oauth.verification_url, user_code)
-    oauth.get_new_token()
+# show_user_code is called from oauth_get_token to present the code to the user
+def show_user_code(user_code, verification_url):
+    print("Go to %s and enter the code %s" % (verification_url, user_code))
 
-gd_client = oauth.spreadsheet_service()
-spreadsheet_id = SPREADSHEET_KEY
-try:
-    worksheets_feed = gd_client.GetWorksheetsFeed(spreadsheet_id)
-except gdata.service.RequestError as error:
-    if (error[0]['status'] == 401):
-        oauth.refresh_token()
-        gd_client = oauth.spreadsheet_service()
-        worksheets_feed = gd_client.GetWorksheetsFeed(spreadsheet_id)
-    else:
-        raise
+# for scopes like profile and email we will get back an jwt token 'id_token'
+# that can be parsed to get the identity details.
+def parse_token(token):
+    parts = token.split('.')
+    if len(parts) == 3:
+        payload = base64.b64decode(parts[1])
+        return json.loads(payload.decode())
 
-worksheet_id = worksheets_feed.entry[0].id.text.rsplit('/',1)[1]
+# initialise the oauth class
+oauth = DeviceOAuth(client_id, client_secret, scopes)
 
-now = datetime.datetime.now().isoformat(' ')
-row = {
-    'project': 'datatest',
-    'start'  : now,
-    'finish' : now
-    }
+# if token.json doesn't exist, a new token will be fetched and the
+# callback 'show_user_code' will be called to get user verification.
+token = oauth.get_token(show_user_code)
+print("token: %s", token)
+if token['id_token']:
+    data = parse_token(token['id_token'])
+    if data:
+        print(json.dumps(data, indent=2))
 
-try:
-    gd_client.InsertRow(row, spreadsheet_id, worksheet_id)
-except gdata.service.RequestError as error:
-    if (error[0]['status'] == 401):
-        oauth.refresh_token()
-        gd_client = oauth.spreadsheet_service()
-        gd_client.InsertRow(row, spreadsheet_id, worksheet_id)
-    else:
-        raise
-
-print "done"
+# To use the token to call a google API, use oauth.get_credentials
+# and credentials.authorize to bind the credentials to http client.
+# This will pass along the bearer token on each request.
+# You may get an error promting you to enable calendar access via the developers console
+credentials = oauth.get_credentials()
+http = credentials.authorize(httplib2.Http())
+service = discovery.build('calendar', 'v3', http=http)
+result = service.events().list(calendarId='primary').execute()
+print(json.dumps(result, indent=2))
+print("done")
