@@ -122,15 +122,15 @@ class SH1106:
     # We will keep d/c low and bump it high only for commands with data
     # reset is normally HIGH, and pulled LOW to reset the display
 
-    def __init__(self, bus=0, device=0, dc_pin="P9_15", reset_pin="P9_13", buffer_rows=64, buffer_cols=132, rows=64, cols=132):
+    def __init__(self, gpio, spi, dc_pin="P9_15", reset_pin="P9_13", buffer_rows=64, buffer_cols=132, rows=64, cols=132):
+        self.gpio = gpio
+        self.spi = spi
         self.cols = cols
         self.rows = rows
         self.buffer_rows = buffer_rows
         self.mem_bytes = self.buffer_rows * self.cols / 8 # total bytes in SH1106 display ram
         self.dc_pin = dc_pin
         self.reset_pin = reset_pin
-        self.spi = gaugette.spi.SPI(bus, device)
-        self.gpio = gaugette.gpio.GPIO()
         self.gpio.setup(self.reset_pin, self.gpio.OUT)
         self.gpio.output(self.reset_pin, self.gpio.HIGH)
         self.gpio.setup(self.dc_pin, self.gpio.OUT)
@@ -147,8 +147,6 @@ class SH1106:
         time.sleep(0.010) # 10ms
 
     def command(self, *bytes):
-        # already low
-        # self.gpio.output(self.dc_pin, self.gpio.LOW) 
         self.spi.writebytes(list(bytes))
 
     def data(self, bytes):
@@ -315,7 +313,7 @@ class SH1106:
         def __init__(self, cols, rows):
             self.rows = rows
             self.cols = cols
-            self.bytes_per_col = rows / 8
+            self.bytes_per_col = rows >> 3
             self.data = [0] * (self.cols * self.bytes_per_col)
     
         def clear(self):
@@ -325,7 +323,7 @@ class SH1106:
         # Diagnostic print of the memory buffer to stdout 
         def dump(self):
             for y in range(0, self.rows):
-                mem_row = y/8
+                mem_row = y >> 3
                 bit_mask = 1 << (y % 8)
                 line = ""
                 for x in range(0, self.cols):
@@ -341,7 +339,7 @@ class SH1106:
             if (x<0 or x>=self.cols or y<0 or y>=self.rows):
                 return
             mem_col = x
-            mem_row = y / 8
+            mem_row = y >> 3
             bit_mask = 1 << (y % 8)
             offset = mem_row * self.cols + mem_col
     
@@ -394,7 +392,7 @@ class SH1106:
                     prev_char = pos
                     prev_width = width
                     
-                    bytes_per_row = (width + 7) / 8
+                    bytes_per_row = (width + 7) >> 3
                     for row in range(0,height):
                         py = y + row
                         mask = 0x80
@@ -430,7 +428,7 @@ class SH1106:
             self.rows = sh1106.rows
             self.cols = sh1106.cols
             self.bufrows = self.rows * 2
-            downset = (self.rows - font.char_height)/2
+            downset = (self.rows - font.char_height) >> 1
             for text in list:
                 width = sh1106.cols
                 text_bitmap = sh1106.Bitmap(width, self.rows)
@@ -446,7 +444,7 @@ class SH1106:
         # how many steps to the nearest home position
         def align_offset(self):
             pos = self.position % self.rows
-            midway = (self.rows/2)
+            midway = self.rows >> 1
             delta = (pos + midway) % self.rows - midway
             return -delta
 
@@ -454,12 +452,12 @@ class SH1106:
             delta = self.align_offset()
             if delta!=0:
                 steps = abs(delta)
-                sign = delta/steps
+                sign = delta // steps
                 for i in range(0,steps):
                     if i>0 and delay>0:
                         time.sleep(delay)
                     self.scroll(sign)
-            return self.position / self.rows
+            return self.position // self.rows
     
         # scroll up or down.  Does multiple one-pixel scrolls if delta is not >1 or <-1
         def scroll(self, delta):
@@ -467,10 +465,10 @@ class SH1106:
                 return
     
             count = len(self.list)
-            step = cmp(delta, 0)
+            step = (delta>0) - (delta<0) # step = 1 or -1
             for i in range(0,delta, step):
                 if (self.position % self.rows) == 0:
-                    n = self.position / self.rows
+                    n = self.position // self.rows
                     # at even boundary, need to update hidden row
                     m = (n + step + count) % count
                     row = (self.offset + self.rows) % self.bufrows
@@ -485,7 +483,7 @@ class SH1106:
         # pans the current row back and forth repeatedly.
         # Note that this currently only works if we are at a home position.
         def auto_pan(self):
-            n = self.position / self.rows
+            n = self.position // self.rows
             if n != self.pan_row:
                 self.pan_row = n
                 self.pan_offset = 0
