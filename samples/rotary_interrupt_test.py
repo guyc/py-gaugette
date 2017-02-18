@@ -12,7 +12,7 @@ B_PIN  = 8
 SW_PIN = 9
 
 gpio = gaugette.gpio.GPIO()
-encoder = gaugette.rotary_encoder.RotaryEncoder.Worker(gpio, A_PIN, B_PIN)
+encoder = gaugette.rotary_encoder.RotaryEncoder(gpio, A_PIN, B_PIN)
 encoder.start()
 switch = gaugette.switch.Switch(gpio, SW_PIN)
 last_state = None

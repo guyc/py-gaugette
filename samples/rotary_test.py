@@ -13,21 +13,23 @@
 #    0 1   2    3    1    0
 
 import gaugette.platform
+import gaugette.gpio
 import gaugette.rotary_encoder
 import gaugette.switch
 import math
 
 if gaugette.platform.isRaspberryPi:
     A_PIN  = 7
-    B_PIN  = 9
-    SW_PIN = 8
+    B_PIN  = 8
+    SW_PIN = 9
 else: # beaglbone
     A_PIN  = "P9_13"
     B_PIN  = "P9_14"
     SW_PIN = "P9_15"
 
-encoder = gaugette.rotary_encoder.RotaryEncoder(A_PIN, B_PIN)
-switch = gaugette.switch.Switch(SW_PIN)
+gpio = gaugette.gpio.GPIO()
+encoder = gaugette.rotary_encoder.RotaryEncoder(gpio, A_PIN, B_PIN)
+switch = gaugette.switch.Switch(gpio, SW_PIN)
 
 last_state = None
 last_switch_state = None
@@ -41,12 +43,12 @@ remainder = steps_per_cycle//2
 
 
 # NOTE: the library includes individual calls to get
-# the rotation_state, rotation_sequence and delta values.  
+# the rotation_state, rotation_sequence and delta values.
 # However this demo only reads the rotation_state and locally
 # derives the rotation_sequence and delta.  This ensures that
 # the derived values are based on the same two input bits A and B.
 # If we used the library calls, there is a very real chance that
-# the inputs would change while we were sampling, giving us 
+# the inputs would change while we were sampling, giving us
 # inconsistent values in the output table.
 
 while True:

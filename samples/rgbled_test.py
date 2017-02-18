@@ -1,7 +1,9 @@
 import gaugette.rgbled
+import gaugette.gpio
 import time
 
-led = gaugette.rgbled.RgbLed(6,5,4)
+gpio = gaugette.gpio.GPIO()
+led = gaugette.rgbled.RgbLed(gpio, 6,5,4)
 led.fade(100,0,0,500)
 time.sleep(1)
 led.fade(100,100,0,500)

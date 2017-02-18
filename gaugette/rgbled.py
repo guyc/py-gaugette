@@ -3,15 +3,15 @@ import gaugette.platform
 
 # -- need to implement PWM on beaglebone to support this class
 if not gaugette.platform.isRaspberryPi:
-  raise NotImplemented('rgbled is not supported on this platform')
+    raise NotImplementedError('rgbled is not supported on this platform')
 
 import wiringpi
 import threading
 
 class RgbLed:
 
-    def __init__(self, r_pin, g_pin, b_pin):
-        self.gpio = gaugette.gpio.GPIO()
+    def __init__(self, gpio, r_pin, g_pin, b_pin):
+        self.gpio = gpio
         self.r_pin = r_pin
         self.b_pin = b_pin
         self.g_pin = g_pin
@@ -21,7 +21,7 @@ class RgbLed:
         self.red = 0
         self.green = 0
         self.blue = 0
-        self.set(0,0,0)
+        self.set(0, 0, 0)
 
     def set(self, red, green, blue):
         self.red = red
@@ -39,6 +39,7 @@ class RgbLed:
             g = self.green + (green-self.green) * f
             wiringpi.softPwmWrite(self.g_pin, int(g))
             b = self.blue  + (blue -self.blue)  * f
+
             wiringpi.softPwmWrite(self.b_pin, int(b))
             wiringpi.delay(step)
         self.red = red
@@ -47,17 +48,21 @@ class RgbLed:
 
     #----------------------------------------------------------------------
     # Optional subclass provides background services for running colour fade sequences
-    #---------------------------------------------------------------------- 
-        
+    #----------------------------------------------------------------------
+
     class Worker(threading.Thread):
-        def __init__(self, r_pin, g_pin, b_pin):
+        def __init__(self, gpio, r_pin, g_pin, b_pin):
             threading.Thread.__init__(self)
-            self.rgbled = RgbLed(r_pin,g_pin,b_pin)
-            self.sequences = [[10,0,0,1000],[0,0,10,1000],[0,10,0,1000]]  # initial pattern
+            self.rgbled = RgbLed(gpio, r_pin, g_pin, b_pin)
+            self.sequences = [[10, 0, 0, 1000], [0, 0, 10, 1000], [0, 10, 0, 1000]]  # initial pattern
             self.condition = threading.Condition()
             self.daemon = True
-            self.set(0,0,0)
             self.changed = False
+            self.red = 0
+            self.green = 0
+            self.blue = 0
+            self.sequence = None
+            self.set(self.red, self.green, self.blue)
 
         def set_sequence(self, sequence):
             self.condition.acquire()
@@ -66,12 +71,12 @@ class RgbLed:
             self.condition.notify()
             self.condition.release()
 
-        def set(self, r,g,b):
+        def set(self, r, g, b):
             self.red = r
             self.green = g
             self.blue = b
-            self.rgbled.set(r,g,b)
-            
+            self.rgbled.set(r, g, b)
+
         def run(self):
             self.condition.acquire()
             self.changed = True
@@ -85,8 +90,8 @@ class RgbLed:
                 action = sequence[i]
                 i = (i + 1) % count
                 if hasattr(action, '__iter__'):
-                    if len(action)==3:
-                        self.set(action[0],action[1],action[2])
+                    if len(action) == 3:
+                        self.set(action[0], action[1], action[2])
                         self.condition.wait()
                     else:
                         red   = action[0]
@@ -96,15 +101,14 @@ class RgbLed:
                         step = 10
                         for j in range(0, delay, step):
                             f = (j+0.0) / delay
-                            r = int(self.red   + (red  -self.red)   * f)
-                            g = int(self.green + (green-self.green) * f)
-                            b = int(self.blue  + (blue -self.blue)  * f)
-                            self.rgbled.set(r,g,b)
+                            r = int(self.red + (red - self.red)   * f)
+                            g = int(self.green + (green - self.green) * f)
+                            b = int(self.blue + (blue - self.blue)  * f)
+                            self.rgbled.set(r, g, b)
                             self.condition.wait(step / 1000.0)
                             if self.changed:
                                 break
-                        self.set(red,green,blue)
+                        self.set(red, green, blue)
                 else:
                     # must be a simple delay
                     self.condition.wait(action / 1000.0)
-            
