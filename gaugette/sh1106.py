@@ -1,17 +1,35 @@
 #----------------------------------------------------------------------
-# ssd1306.py from https://github.com/guyc/py-gaugette
-# ported by Guy Carpenter, Clearwater Software
+# sh1106.py from https://github.com/guyc/py-gaugette
+# by Max Sheehan
+# based on ssd1306.py by Guy Carpenter, Clearwater Software
 #
+# REVISIT : this should be refactored to remove duplicated code from ssd1306.py
+# 
 # This library works with
-#   Adafruit's 128x32 SPI monochrome OLED   http://www.adafruit.com/products/661
-#   Adafruit's 128x64 SPI monochrome OLED   http://www.adafruit.com/products/326
-# it should work with other SSD1306-based displays.
+#   A 7-PIN 1.3 inch SPI (Not I2C) SH1106 OLED - Example:
+#     https://www.amazon.co.uk/128X64-Display-Module-Board-Arduino/dp/B01GC6C1CA
+#
+# it should work with other SH1106-based displays.
+# The datasheet for the SSH1106 is available
+#  http://www.held-im-ruhestand.de/_downloads/oled-sh1106-datasheet.pdf
 # The datasheet for the SSD1306 is available
 #   http://www.adafruit.com/datasheets/SSD1306.pdf
 #
 # The code is based heavily on Adafruit's Arduino library
 #   https://github.com/adafruit/Adafruit_SSD1306
 # written by Limor Fried/Ladyada for Adafruit Industries.
+#
+# Some important differences between the SH1106 and SSD1306
+#
+# - The SH1106 does not support switching memory mode to vertical.
+#   Therefore the logic in the Bitmap helper class has been modified.
+#
+# - The page and column have to be reset when you reach the end of a line
+#   this is handled in the display_block method.
+#
+# - The memory in the SH1106 is 132x64 although the OLED I have is only
+#   128x64. The first 2 and last 2 columns are not displayed.
+#   So it's best if these columns are not used.
 #
 # Some important things to know about this device and SPI:
 #
@@ -39,14 +57,13 @@
 #
 # - The pin connections between the BeagleBone Black SPI0 and OLED module are:
 #
-#      BBB    SSD1306
+#      BBB       SH1106
 #      P9_17  -> CS
 #      P9_15  -> RST   (arbirary GPIO, change at will)
 #      P9_13  -> D/C   (arbirary GPIO, change at will)
 #      P9_22  -> CLK
 #      P9_18  -> DATA
 #      P9_3   -> VIN
-#      N/C    -> 3.3Vo
 #      P9_1   -> GND
 #----------------------------------------------------------------------
 
@@ -57,19 +74,20 @@ import gaugette.font5x8
 import time
 import sys
 
-class SSD1306:
+class SH1106:
 
-    # Class constants are externally accessible as gaugette.ssd1306.SSD1306.CONST
+    # Class constants are externally accessible as gaugette.sh1106.SH1106.CONST
     # or my_instance.CONST
+
+    # TODO - insert underscores to rationalize constant names
 
     EXTERNAL_VCC   = 0x1
     SWITCH_CAP_VCC = 0x2
 
     SET_LOW_COLUMN        = 0x00
     SET_HIGH_COLUMN       = 0x10
-    SET_MEMORY_MODE       = 0x20
-    SET_COL_ADDRESS       = 0x21
-    SET_PAGE_ADDRESS      = 0x22
+    #SET_MEMORY_MODE       = 0x20
+    #SET_COL_ADDRESS       = 0x21
     RIGHT_HORIZ_SCROLL    = 0x26
     LEFT_HORIZ_SCROLL     = 0x27
     VERT_AND_RIGHT_HORIZ_SCROLL = 0x29
@@ -79,6 +97,7 @@ class SSD1306:
     SET_START_LINE        = 0x40
     SET_CONTRAST          = 0x81
     CHARGE_PUMP           = 0x8D
+    SET_PAGE_ADDRESS      = 0xB0 #0x22
     SEG_REMAP             = 0xA0
     SET_VERT_SCROLL_AREA  = 0xA3
     DISPLAY_ALL_ON_RESUME = 0xA4
@@ -96,22 +115,22 @@ class SSD1306:
     SET_PRECHARGE         = 0xD9
     SET_MULTIPLEX         = 0xA8
 
-    MEMORY_MODE_HORIZ = 0x00
-    MEMORY_MODE_VERT  = 0x01
-    MEMORY_MODE_PAGE  = 0x02
+    #MEMORY_MODE_HORIZ = 0x00
+    #MEMORY_MODE_VERT  = 0x01
+    #MEMORY_MODE_PAGE  = 0x02
 
     # Device name will be /dev/spidev-{bus}.{device}
     # dc_pin is the data/commmand pin.  This line is HIGH for data, LOW for command.
     # We will keep d/c low and bump it high only for commands with data
     # reset is normally HIGH, and pulled LOW to reset the display
 
-    def __init__(self, gpio, spi, dc_pin="P9_15", reset_pin="P9_13", buffer_rows=64, buffer_cols=128, rows=32, cols=128):
+    def __init__(self, gpio, spi, dc_pin="P9_15", reset_pin="P9_13", buffer_rows=64, buffer_cols=132, rows=64, cols=132):
         self.gpio = gpio
         self.spi = spi
         self.cols = cols
         self.rows = rows
         self.buffer_rows = buffer_rows
-        self.mem_bytes = self.buffer_rows * self.cols >> 3 # total bytes in SSD1306 display ram
+        self.mem_bytes = self.buffer_rows * self.cols >> 3 # total bytes in SH1106 display ram
         self.dc_pin = dc_pin
         self.reset_pin = reset_pin
         self.gpio.setup(self.reset_pin, self.gpio.OUT)
@@ -127,15 +146,14 @@ class SSD1306:
         self.gpio.output(self.reset_pin, self.gpio.LOW)
         time.sleep(0.010) # 10ms
         self.gpio.output(self.reset_pin, self.gpio.HIGH)
+        time.sleep(0.010) # 10ms
 
     def command(self, *bytes):
-        # already low
-        # self.gpio.output(self.dc_pin, self.gpio.LOW)
         self.spi.writebytes(list(bytes))
 
     def data(self, bytes):
         self.gpio.output(self.dc_pin, self.gpio.HIGH)
-        #  chunk data to work around 255 byte limitation in adafruit implementation of writebytes
+        # chunk data to work around 255 byte limitation in adafruit implementation of writebytes
         # revisit - change to 1024 when Adafruit_BBIO is fixed.
         max_xfer = 255 if gaugette.platform.isBeagleBoneBlack else 1024
         start = 0
@@ -148,7 +166,6 @@ class SSD1306:
         self.gpio.output(self.dc_pin, self.gpio.LOW)
 
     def begin(self, vcc_state=SWITCH_CAP_VCC):
-        time.sleep(0.001) # 1ms
         self.reset()
         self.command(self.DISPLAY_OFF)
         self.command(self.SET_DISPLAY_CLOCK_DIV, 0x80)
@@ -167,7 +184,7 @@ class SSD1306:
             self.command(self.CHARGE_PUMP, 0x10)
         else:
             self.command(self.CHARGE_PUMP, 0x14)
-        self.command(self.SET_MEMORY_MODE, 0x00)
+        # self.command(self.SET_MEMORY_MODE, 0x00)
         self.command(self.SEG_REMAP | 0x01)
         self.command(self.COM_SCAN_DEC)
         self.command(self.SET_CONTRAST, 0x8f)
@@ -207,7 +224,7 @@ class SSD1306:
     def display_cols(self, start_col, count):
         self.display_block(self.bitmap, 0, start_col, count, self.col_offset)
 
-    # Transfers data from the passed bitmap (instance of ssd1306.Bitmap)
+    # Transfers data from the passed bitmap (instance of sh1106.Bitmap)
     # starting at row <row> col <col>.
     # Both row and bitmap.rows will be divided by 8 to get page addresses,
     # so both must divide evenly by 8 to avoid surprises.
@@ -220,17 +237,24 @@ class SSD1306:
     # col_offset: column offset in buffer to write from
     #
     def display_block(self, bitmap, row, col, col_count, col_offset=0):
+        # The code here differs from the SSD1306
+        # since the SH1106 doesn't support SET_COL_ADDRESS
+        # or Vertical memory mode
         page_count = bitmap.rows >> 3
         page_start = row >> 3
         page_end   = page_start + page_count - 1
-        col_start  = col
+        col_start_l = col & 0x0F
+        col_start_h = (col >> 4) & 0x0F
         col_end    = col + col_count - 1
-        self.command(self.SET_MEMORY_MODE, self.MEMORY_MODE_VERT)
-        self.command(self.SET_PAGE_ADDRESS, page_start, page_end)
-        self.command(self.SET_COL_ADDRESS, col_start, col_end)
-        start = col_offset * page_count
-        length = col_count * page_count
-        self.data(bitmap.data[start:start+length])
+
+        length = col_count
+        while (page_start <= page_end):
+            self.command(self.SET_PAGE_ADDRESS | page_start)
+            self.command(self.SET_LOW_COLUMN  | col_start_l)
+            self.command(self.SET_HIGH_COLUMN | col_start_h)
+            start = (col_offset * page_count) + (page_start * bitmap.cols)
+            self.data(bitmap.data[start:start+length])
+            page_start += 1
 
     # Diagnostic print of the memory buffer to stdout
     def dump_buffer(self):
@@ -285,10 +309,8 @@ class SSD1306:
 
     class Bitmap:
 
-        # Pixels are stored in column-major order!
-        # This makes it easy to reference a vertical slice of the display buffer
-        # and we use the to achieve reasonable performance vertical scrolling
-        # without hardware support.
+        # No longer column major due to the SH1106 not supporting
+        # Vertical write mode
         def __init__(self, cols, rows):
             self.rows = rows
             self.cols = cols
@@ -296,7 +318,7 @@ class SSD1306:
             self.data = [0] * (self.cols * self.bytes_per_col)
 
         def clear(self):
-            for i in range(0, len(self.data)):
+            for i in range(0,len(self.data)):
                 self.data[i] = 0
 
         # Diagnostic print of the memory buffer to stdout
@@ -307,7 +329,7 @@ class SSD1306:
                 line = ""
                 for x in range(0, self.cols):
                     mem_col = x
-                    offset = mem_row + (self.rows >> 3) * mem_col
+                    offset = mem_row * self.cols + mem_col
                     if self.data[offset] & bit_mask:
                         line += '*'
                     else:
@@ -320,7 +342,7 @@ class SSD1306:
             mem_col = x
             mem_row = y >> 3
             bit_mask = 1 << (y % 8)
-            offset = mem_row + (self.rows >> 3) * mem_col
+            offset = mem_row * self.cols + mem_col
 
             if on:
                 self.data[offset] |= bit_mask
@@ -394,8 +416,8 @@ class SSD1306:
     # This is a helper class to display a scrollable list of text lines.
     # The list must have at least 1 item.
     class ScrollingList:
-        def __init__(self, ssd1306, list, font):
-            self.ssd1306 = ssd1306
+        def __init__(self, sh1106, list, font):
+            self.sh1106 = sh1106
             self.list = list
             self.font = font
             self.position = 0 # row index into list, 0 to len(list) * self.rows - 1
@@ -404,21 +426,21 @@ class SSD1306:
             self.pan_offset = 0
             self.pan_direction = 1
             self.bitmaps = []
-            self.rows = ssd1306.rows
-            self.cols = ssd1306.cols
+            self.rows = sh1106.rows
+            self.cols = sh1106.cols
             self.bufrows = self.rows * 2
             downset = (self.rows - font.char_height) >> 1
             for text in list:
-                width = ssd1306.cols
-                text_bitmap = ssd1306.Bitmap(width, self.rows)
+                width = sh1106.cols
+                text_bitmap = sh1106.Bitmap(width, self.rows)
                 width = text_bitmap.draw_text(0, downset, text, font)
                 if width > 128:
-                    text_bitmap = ssd1306.Bitmap(width + 15, self.rows)
+                    text_bitmap = sh1106.Bitmap(width + 15, self.rows)
                     text_bitmap.draw_text(0, downset, text, font)
                 self.bitmaps.append(text_bitmap)
 
             # display the first word in the first position
-            self.ssd1306.display_block(self.bitmaps[0], 0, 0, self.cols)
+            self.sh1106.display_block(self.bitmaps[0], 0, 0, self.cols)
 
         # how many steps to the nearest home position
         def align_offset(self):
@@ -451,11 +473,11 @@ class SSD1306:
                     # at even boundary, need to update hidden row
                     m = (n + step + count) % count
                     row = (self.offset + self.rows) % self.bufrows
-                    self.ssd1306.display_block(self.bitmaps[m], row, 0, self.cols)
+                    self.sh1106.display_block(self.bitmaps[m], row, 0, self.cols)
                     if m == self.pan_row:
                         self.pan_offset = 0
                 self.offset = (self.offset + self.bufrows + step) % self.bufrows
-                self.ssd1306.command(self.ssd1306.SET_START_LINE | self.offset)
+                self.sh1106.command(self.sh1106.SET_START_LINE | self.offset)
                 max_position = count * self.rows
                 self.position = (self.position + max_position + step) % max_position
 
@@ -480,4 +502,4 @@ class SSD1306:
                         self.pan_offset -= 1
                     else:
                         self.pan_direction = 1
-                self.ssd1306.display_block(text_bitmap, row, 0, self.cols, self.pan_offset)
+                self.sh1106.display_block(text_bitmap, row, 0, self.cols, self.pan_offset)
