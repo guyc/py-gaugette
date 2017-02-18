@@ -383,7 +383,7 @@ class SSD1306:
                             mask >>= 1
                             if mask == 0:
                                 mask = 0x80
-                                p+=1
+                                p += 1
                         offset += bytes_per_row
 
             if prev_char != None:
