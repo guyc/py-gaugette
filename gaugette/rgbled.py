@@ -33,12 +33,13 @@ class RgbLed:
 
     def fade(self, red, green, blue, delay=500, step=5):
         for i in range(0, delay, step):
-            f = (0.0 + i)/delay
-            r = self.red + (red  -self.red)   * f
+            f = (0.0+i)/delay
+            r = self.red   + (red  -self.red)   * f
             wiringpi.softPwmWrite(self.r_pin, int(r))
             g = self.green + (green-self.green) * f
             wiringpi.softPwmWrite(self.g_pin, int(g))
-            b = self.blue + (blue -self.blue)  * f
+            b = self.blue  + (blue -self.blue)  * f
+
             wiringpi.softPwmWrite(self.b_pin, int(b))
             wiringpi.delay(step)
         self.red = red

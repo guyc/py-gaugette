@@ -6,8 +6,8 @@ import time
 ROWS = 32
 
 if gaugette.platform.isRaspberryPi:
-    RESET_PIN = 15
-    DC_PIN    = 16
+    RESET_PIN = 1
+    DC_PIN    = 0
 else:  # beagebone
     RESET_PIN = "P9_15"
     DC_PIN    = "P9_13"

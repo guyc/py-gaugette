@@ -26,7 +26,8 @@ I have not yet tested it on the BeagleBone.
 Prerequisites for the Raspberry Pi
 ==================================
 
-### WiringPi
+
+### WiringPi and WiringPi-Python
 
 Modules that use GPIO require [wiringpi](https://projects.drogon.net/raspberry-pi/wiringpi/) and [WiringPi-Python](https://github.com/WiringPi/WiringPi-Python).
 
@@ -35,6 +36,8 @@ To install wiringpi-python for the RaspberryPi:
 ```
 sudo pip install wiringpi
 ```
+Please refer to their README: <https://github.com/WiringPi/WiringPi-Python>
+
 
 ### py-spidev
 
