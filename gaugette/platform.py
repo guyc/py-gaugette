@@ -64,7 +64,7 @@ def pi_revision():
             match = re.match('Revision\s+:\s+.*(\w{4})$', line, flags=re.IGNORECASE)
             if match and match.group(1) in ['0000', '0002', '0003']:
                 # Return revision 1 if revision ends with 0000, 0002 or 0003.
-                return 1ß
+                return 1
             elif match:
                 # Assume revision 2 if revision ends with any other 4 chars.
                 return 2
