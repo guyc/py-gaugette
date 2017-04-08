@@ -153,7 +153,7 @@ Rotary Encoder Usage
     encoder = gaugette.rotary_encoder.RotaryEncoder(gpio, A_PIN, B_PIN)
     encoder.start()
     while True:
-      delta = encoder.get_delta()
+      delta = encoder.get_cycles()
       if delta!=0:
         print "rotate %d" % delta
       else:
