@@ -4,10 +4,10 @@ py-gaugette
 A library for interfacing hardware with the Raspberry Pi and BeagleBone Black.
 Supports SSD1306 displays, rotary encoders, capacitance switches, RGB leds and other devices.
 
-Changes at 2.0
+Changes at 3.0
 ==============
 
-Version 2 is a breaking upgrade.  Programs written for V1 will need some changes.
+Version 3 is a breaking upgrade.  Programs written for earlier versions will need some changes.
   - most constructors now take a gpio argument as their first parameter.
   - all modules are now written for Python 3.
   - the rotary encoder now supports interrupts.
