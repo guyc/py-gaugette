@@ -66,7 +66,7 @@ SSD1306 OLED Usage
     RESET_PIN = 15
     DC_PIN    = 16
     gpio = gaugette.gpio.GPIO()
-    spi = spi = gaugette.spi.SPI(spi_bus=0, spi_device=0)
+    spi = spi = gaugette.spi.SPI(bus=0, device=0)
     led = gaugette.ssd1306.SSD1306(gpio, spi, reset_pin=RESET_PIN, dc_pin=DC_PIN)
     led.begin()
     led.clear_display()
