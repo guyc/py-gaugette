@@ -9,6 +9,14 @@ class Switch:
         pull_up_mode = gpio.PUD_UP if pull_up else gpio.PUD_DOWN
         self.gpio.setup(self.pin, self.gpio.IN, pull_up_mode)
 
+    # edge = gpio.EDGE_FALLING or gpio.EDGE_RISING
+    # isr = interrupt service routine
+    def enable_isr(self, edge, isr):
+        if edge:
+            self.gpio.trigger(self.pin, edge, isr)
+        else:
+            self.gpio.trigger(self.pin, edge, isr)
+
     def get_state(self):
         state = self.gpio.input(self.pin)
         if self.pull_up:
