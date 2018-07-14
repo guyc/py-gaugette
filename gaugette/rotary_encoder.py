@@ -48,7 +48,7 @@ class RotaryEncoder:
 
         # Callback function gets called when a rotation is detected
         # Function format should be:
-        # FuncName(x) where x is 1 or -1 depending on the detected roation
+        # FuncName(x) where x is 1 or -1 depending on the detected rotation
         # direction
         self.callback = callback
 
