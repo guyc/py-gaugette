@@ -12,10 +12,7 @@ class Switch:
     # edge = gpio.EDGE_FALLING or gpio.EDGE_RISING
     # isr = interrupt service routine
     def enable_isr(self, edge, isr):
-        if edge:
-            self.gpio.trigger(self.pin, edge, isr)
-        else:
-            self.gpio.trigger(self.pin, edge, isr)
+        self.gpio.trigger(self.pin, edge, isr)
 
     def get_state(self):
         state = self.gpio.input(self.pin)

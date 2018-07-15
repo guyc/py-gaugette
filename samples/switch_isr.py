@@ -13,7 +13,7 @@ def pushed():
 
 gpio = gaugette.gpio.GPIO()
 sw = gaugette.switch.Switch(gpio, SW_PIN)
-# Calls pushed() on a rising edge
+# Calls pushed() on a falling edge
 sw.enable_isr(gpio.EDGE_FALLING, pushed)
 
 while True:
