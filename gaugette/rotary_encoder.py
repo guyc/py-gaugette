@@ -34,7 +34,7 @@ class RotaryEncoder:
     # Pass the wiring pin numbers here.  See:
     #  https://projects.drogon.net/raspberry-pi/wiringpi2/pins/
     #----------------------------------------------------------------------
-    def __init__(self, gpio, a_pin, b_pin):
+    def __init__(self, gpio, a_pin, b_pin, callback=None):
         self.gpio = gpio
         self.a_pin = a_pin
         self.b_pin = b_pin
@@ -45,6 +45,12 @@ class RotaryEncoder:
         self.steps = 0
         self.last_delta = 0
         self.r_seq = self.rotation_sequence()
+
+        # Callback function gets called when a rotation is detected
+        # Function format should be:
+        # FuncName(x) where x is 1 or -1 depending on the detected rotation
+        # direction
+        self.callback = callback
 
         # steps_per_cycle and self.remainder are only used in get_cycles which
         # returns a coarse-granularity step count.  By default
@@ -94,6 +100,11 @@ class RotaryEncoder:
             self.last_delta = delta
             self.r_seq = r_seq
         self.steps += delta
+        if(self.callback is not None):
+            cycles = self.get_cycles()
+            if(cycles != 0):
+                self.callback(cycles)
+            
 
     def get_steps(self):
         steps = self.steps
